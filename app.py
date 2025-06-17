@@ -9,25 +9,21 @@ import pandas as pd
 import numpy as np
 import datetime
 
-# ✅ Load environment variables
 load_dotenv()
-TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
-# ✅ Telegram bot init
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
+
 bot = telebot.TeleBot(TELEGRAM_BOT_TOKEN)
 app = Flask(__name__)
 
-# ✅ Coins list
 COINS = ["bitcoin", "ethereum", "solana", "bnb", "matic-network"]
 
-# ✅ Fetch price history
 def fetch_price_history(coin_id="bitcoin", days=2):
     url = f"https://api.coingecko.com/api/v3/coins/{coin_id}/market_chart"
     params = {
         "vs_currency": "usd",
-        "days": days,
-        "interval": "hourly"
+        "days": days  # ✅ interval हटाया गया
     }
     try:
         response = requests.get(url, params=params)
@@ -39,9 +35,8 @@ def fetch_price_history(coin_id="bitcoin", days=2):
         print(f"❌ Error fetching data for {coin_id}:", e)
         return []
 
-# ✅ 24h Price change
 def fetch_price_change_24h(coin_id="bitcoin"):
-    url = "https://api.coingecko.com/api/v3/simple/price"
+    url = f"https://api.coingecko.com/api/v3/simple/price"
     params = {
         "ids": coin_id,
         "vs_currencies": "usd",
@@ -56,7 +51,6 @@ def fetch_price_change_24h(coin_id="bitcoin"):
         print(f"❌ Error fetching 24h change for {coin_id}:", e)
         return 0
 
-# ✅ Indicators
 def calculate_rsi(data, period=14):
     series = pd.Series(data)
     delta = series.diff()
@@ -90,7 +84,6 @@ def calculate_bollinger_bands(data):
     lower_band = sma - (2 * std)
     return upper_band.iloc[-1], lower_band.iloc[-1]
 
-# ✅ Signal generation
 def analyze_market(prices):
     if len(prices) < 26:
         return "⚠️ Not enough data."
@@ -108,28 +101,23 @@ def analyze_market(prices):
     else:
         return f"⚖️ HOLD\nRSI: {rsi:.2f}, MACD: {macd:.2f}, EMA9: {ema9:.2f}, Price: ${current_price:.2f}"
 
-# ✅ Auto signal loop
 def send_signal():
     print("✅ DEBUG | Signal loop started...")
     while True:
         try:
             for coin in COINS:
-                print(f"📊 Checking: {coin}")
                 prices = fetch_price_history(coin)
-                print("✅ DEBUG | Prices fetched:", prices[-5:])
-                signal = analyze_market(prices)
-                print("✅ DEBUG | Signal detected:", signal)
-                if "BUY" in signal or "SELL" in signal:
-                    bot.send_message(CHAT_ID, f"📢 {coin.upper()} Signal:\n{signal}")
-                    print("📤 Sent to Telegram")
-                else:
-                    print("🟡 HOLD — No action taken")
-                time.sleep(5)
+                print(f"✅ DEBUG | {coin} prices fetched:", prices[-5:])
+                if prices:
+                    signal = analyze_market(prices)
+                    print(f"📊 {coin.upper()} Signal:", signal)
+                    if "STRONG" in signal:
+                        bot.send_message(TELEGRAM_CHAT_ID, f"📢 {coin.upper()} Signal:\n{signal}")
+                        print("📤 Sent to Telegram!")
         except Exception as e:
             print("❌ Error in signal loop:", e)
-        time.sleep(1800)  # Every 30 minutes
+        time.sleep(600)  # 10 minutes
 
-# ✅ Daily summary at 8 AM
 def daily_summary():
     while True:
         now = datetime.datetime.now()
@@ -144,14 +132,13 @@ def daily_summary():
                         summary.append(f"📍 {coin.upper()}:\n{signal}\n🔁 24h Change: {change:.2f}%")
                 except Exception as e:
                     summary.append(f"{coin.upper()}: ❌ Error in summary")
-            bot.send_message(CHAT_ID, "\n\n".join(summary))
+            bot.send_message(TELEGRAM_CHAT_ID, "\n\n".join(summary))
             time.sleep(300)
         time.sleep(60)
 
-# ✅ Flask endpoints
 @app.route('/')
 def home():
-    return "✅ Multi-Coin Bot Running"
+    return "✅ Multi-Coin Bot Running With Advanced Indicators"
 
 @app.route('/test-signal')
 def test_signal():
@@ -161,11 +148,10 @@ def test_signal():
         if prices:
             signal = analyze_market(prices)
             change = fetch_price_change_24h(coin)
-            bot.send_message(CHAT_ID, f"🧪 {coin.upper()} Test:\n{signal}\n🔁 24h Change: {change:.2f}%")
+            bot.send_message(TELEGRAM_CHAT_ID, f"🧪 {coin.upper()} Test:\n{signal}\n🔁 24h Change: {change:.2f}%")
             output.append(f"{coin}: ✅")
     return "✅ Test signals sent."
 
-# ✅ Start everything
 if __name__ == "__main__":
     Thread(target=send_signal).start()
     Thread(target=daily_summary).start()
