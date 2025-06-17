@@ -102,24 +102,22 @@ def analyze_market(prices):
     else:
         return f"⚖️ HOLD\nRSI: {rsi:.2f}, MACD: {macd:.2f}, EMA9: {ema9:.2f}, Price: ${current_price:.2f}"
 
-def signal_loop():
+def send_signal():
+    print("✅ DEBUG | Signal loop started...")
     while True:
-        for coin in COINS:
-            try:
-                prices = fetch_price_history(coin)
-                if prices:
-                    signal = analyze_market(prices)
-                    if "BUY" in signal or "SELL" in signal:
-                        bot.send_message(TELEGRAM_CHAT_ID, f"📊 {coin.upper()} Signal:\n{signal}")
-
-                    change = fetch_price_change_24h(coin)
-                    if abs(change) >= 5:
-                        alert = f"🚨 {coin.upper()} price change: {change:.2f}% in 24h"
-                        bot.send_message(TELEGRAM_CHAT_ID, alert)
-                else:
-                    print(f"⚠️ No data for {coin}")
-            except Exception as e:
-                print(f"❌ Error analyzing {coin}:", e)
+        try:
+            print("✅ DEBUG | Fetching prices...")
+            prices = fetch_prices()
+            print("✅ DEBUG | Prices fetched:", prices)
+            signal = analyze_market(prices)
+            print("✅ DEBUG | Signal detected:", signal)
+            if signal != "HOLD":
+                bot.send_message(chat_id, f"📢 Signal: {signal}")
+                print("📤 Sending signal to Telegram...")
+            else:
+                print("🟡 No clear signal yet.")
+        except Exception as e:
+            print("❌ Error in signal loop:", e)
         time.sleep(3600)
 
 def daily_summary():
