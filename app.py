@@ -4,6 +4,7 @@ from threading import Thread
 from flask import Flask
 from dotenv import load_dotenv
 import telebot
+from utils import fetch_prices
 import requests
 import pandas as pd
 import numpy as np
