@@ -119,7 +119,7 @@ def send_signal():
                 print("🟡 No clear signal yet.")
         except Exception as e:
             print("❌ Error in signal loop:", e)
-        time.sleep(3600)
+        time.sleep(10)
 
 def daily_summary():
     while True:
