@@ -1,6 +1,6 @@
 requests
-telebot
 flask
+telebot
 python-dotenv
-pandas
 numpy
+pandas
