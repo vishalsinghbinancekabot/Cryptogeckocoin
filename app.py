@@ -122,6 +122,18 @@ def test_signal():
         bot.send_message(TELEGRAM_CHAT_ID, f"🧪 {coin.upper()} Test:\n{signal}")
         output.append(f"{coin}: Sent")
     return "\n".join(output)
+    @app.route('/force-signal/<coin>/<signal_type>')
+def force_signal(coin, signal_type):
+    signal_type = signal_type.lower()
+    if signal_type == "buy":
+        signal = f"💹 FORCED BUY SIGNAL\nCoin: {coin.upper()}\nThis is a test buy signal."
+    elif signal_type == "sell":
+        signal = f"🔻 FORCED SELL SIGNAL\nCoin: {coin.upper()}\nThis is a test sell signal."
+    else:
+        return "❌ Invalid signal type. Use 'buy' or 'sell'."
+    
+    bot.send_message(TELEGRAM_CHAT_ID, f"📢 {coin.upper()} SIGNAL:\n{signal}")
+    return f"✅ Forced {signal_type.upper()} signal sent for {coin.upper()}"
 
 # --------------------- RUNNING ---------------------
 if __name__ == '__main__':
