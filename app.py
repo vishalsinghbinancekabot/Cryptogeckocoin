@@ -123,7 +123,7 @@ def test_signal():
         output.append(f"{coin}: Sent")
     return "\n".join(output)
    
-    @app.route('/force-signal/<coin>/<signal_type>')
+@app.route('/force-signal/<coin>/<signal_type>')
 def force_signal(coin, signal_type):
     signal_type = signal_type.lower()
     if signal_type == "buy":
