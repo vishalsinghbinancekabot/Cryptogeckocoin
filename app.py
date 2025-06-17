@@ -153,6 +153,6 @@ def test_signal():
     return "✅ Test signals sent."
 
 if __name__ == "__main__":
-    bot.send_message(TELEGRAM_CHAT_ID, "🧪 Bot is working fine!")
     Thread(target=send_signal).start()
+    Thread(target=daily_summary).start()
     app.run(host="0.0.0.0", port=10000)
