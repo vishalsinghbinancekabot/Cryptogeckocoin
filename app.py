@@ -102,7 +102,7 @@ def analyze_market(prices):
     else:
         return f"⚖️ HOLD\nRSI: {rsi:.2f}, MACD: {macd:.2f}, EMA9: {ema9:.2f}, Price: ${current_price:.2f}"
 
-Thread(target=send_signal).start()
+def send_signal():
     print("✅ DEBUG | Signal loop started...")
     while True:
         try:
