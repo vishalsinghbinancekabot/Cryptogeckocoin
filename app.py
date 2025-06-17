@@ -155,6 +155,5 @@ def test_signal():
     return "✅ Test signals sent."
 
 if __name__ == "__main__":
-    Thread(target=signal_loop).start()
-    Thread(target=daily_summary).start()
+    Thread(target=send_signal).start()
     app.run(host="0.0.0.0", port=10000)
