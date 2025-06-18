@@ -18,8 +18,7 @@ TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 bot = telebot.TeleBot(TELEGRAM_BOT_TOKEN)
 app = Flask(__name__)
 
-COINS = ["bitcoin", "ethereum", "solana", "bnb", "matic-network"]
-last_fetch_time = {}
+COINS = ["bitcoin", "ethereum", "solana", "binancecoin", "polygon"]
 
 # ✅ Should Fetch Logic
 def should_fetch(coin):
@@ -30,19 +29,23 @@ def should_fetch(coin):
     return False
 
 # ✅ Fetch Price History
-def fetch_price_history(coin_id="bitcoin", days=3):
-    url = f"https://api.coingecko.com/api/v3/coins/{coin_id}/market_chart?vs_currency=usd&days={days}"
+def fetch_current_price(coin_id):
+    url = f"https://api.coingecko.com/api/v3/simple/price?ids={coin_id}&vs_currencies=usd"
     headers = {
-        'User-Agent': 'Mozilla/5.0 (compatible; TelegramBot/1.0; +https://yourbot.com)'
+        'User-Agent': 'Mozilla/5.0 (compatible; TelegramBot/1.0)'
     }
     try:
-        response = requests.get(url, headers=headers)
-        print(f"🔗 URL: {url}")
+        response = requests.get(url, headers=headers, timeout=10)
+        print(f"🔗 Fetching {coin_id}: {url}")
         print(f"📥 Status: {response.status_code}")
-        print(f"📥 Partial Response: {response.text[:150]}")
+        print(f"📥 Response: {response.text}")
 
-        response.raise_for_status()
         data = response.json()
+        return data[coin_id]["usd"]  # ✅ Ye sahi key hai
+    except Exception as e:
+        print(f"❌ Error fetching price for {coin_id}: {e}")
+        return None
+
 
         # ✅ Check if "prices" key exists
         if "prices" not in data:
