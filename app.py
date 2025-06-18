@@ -131,13 +131,20 @@ def home():
 def test_signal():
     output = []
     for coin in COINS:
-        prices = fetch_price_history(coin)
-        if not prices:
-            continue
-        signal = analyze_market(prices)
-        bot.send_message(TELEGRAM_CHAT_ID, f"🧪 {coin.upper()} Test:\n{signal}")
-        output.append(f"{coin}: Sent")
-    return "\n".join(output)
+        try:
+            print(f"🧪 Testing {coin}...")
+            prices = fetch_price_history(coin)
+            if not prices:
+                output.append(f"{coin}: ❌ No prices")
+                continue
+            signal = analyze_market(prices)
+            print(f"📤 Sending signal for {coin}: {signal}")
+            bot.send_message(TELEGRAM_CHAT_ID, f"🧪 {coin.upper()} Test:\n{signal}")
+            output.append(f"{coin}: ✅ Sent")
+        except Exception as e:
+            print(f"❌ Error in {coin}: {e}")
+            output.append(f"{coin}: ❌ Error")
+    return "<br>".join(output)
 
 @app.route('/force-signal/<coin>/<signal_type>')
 def force_signal(coin, signal_type):
