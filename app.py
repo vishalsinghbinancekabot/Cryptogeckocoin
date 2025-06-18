@@ -106,32 +106,25 @@ def analyze_market(prices):
     else:
         return f"⚖️ HOLD\nRSI: {rsi:.2f}, MACD: {macd:.2f}, Price: ${current_price:.2f}"
 
-def send_signal():
-    print("📡 Signal loop started...")  # ✅ 1. Start indicator
-    while True:
-        try:
-            for coin in COINS:
-                prices = fetch_price_history(coin)
-                if not prices:
-                    print(f"⚠️ No prices for {coin}")
-                    continue
+def should_fetch(coin):
+    now = time.time()
+    if coin not in last_fetch_time or now - last_fetch_time[coin] > 3600:
+        last_fetch_time[coin] = now
+        return True
+    return False
 
-                # ✅ 2. Prices check karne ke liye
-                print(f"🔍 {coin} prices: {prices[-5:]}")
-
-                signal = analyze_market(prices)
-
-                # ✅ 3. Analyze ke baad kya aaya
-                print(f"🧠 Analyzed Signal for {coin}: {signal}")
-
-                # ✅ 4. Always send signal for now
-                bot.send_message(TELEGRAM_CHAT_ID, f"📢 {coin.upper()}:\n{signal}")
-                print(f"✅ Sent signal for {coin}")
-        except Exception as e:
-            print("❌ Error in signal loop:", e)
-        
-        time.sleep(300)  # ✅ 5. Har 1 ghnate me signal check
-
+def fetch_price_history(coin_id="bitcoin", days=3):
+    url = f"https://api.coingecko.com/api/v3/coins/{coin_id}/market_chart?vs_currency=usd&days={days}"
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (compatible; TelegramBot/1.0; +https://yourbot.com)'
+    }
+    try:
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()
+        return response.json()['prices']
+    except Exception as e:
+        print(f"❌ Error fetching data for {coin_id}: {e}")
+        return []
 @app.route('/')
 def home():
     return "✅ Bot is running..."
