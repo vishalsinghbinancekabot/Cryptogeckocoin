@@ -32,6 +32,7 @@ def fetch_price_history(coin_id="bitcoin", days=3):
         data = response.json()
         prices = [price[1] for price in data["prices"]]
 
+        # 👉 YAHAN PRINT LAGAO
         print(f"📊 {coin_id} fetched {len(prices)} prices.")
 
         return prices
@@ -75,6 +76,7 @@ def calculate_bollinger_bands(data):
 # --------------------- ANALYZE & SEND SIGNAL ---------------------
 def analyze_market(prices):
     if len(prices) < 26:
+        print(f"⚠️ Not enough data | Got only {len(prices)} prices")
         return "⚠️ Not enough data"
 
     current_price = prices[-1]
@@ -82,6 +84,9 @@ def analyze_market(prices):
     macd, signal_line = calculate_macd(prices)
     ema9, ema21 = calculate_ema_crossover(prices)
     upper, lower = calculate_bollinger_bands(prices)
+
+    # 👉 YAHAN PRINT LAGAO
+    print(f"🔍 Price: {current_price}, RSI: {rsi:.2f}, MACD: {macd:.2f}, Signal: {signal_line:.2f}")
 
     if rsi < 30 and macd > signal_line and ema9 > ema21 and current_price < lower:
         return f"💹 STRONG BUY\nRSI: {rsi:.2f}, MACD: {macd:.2f}, Price: ${current_price:.2f}"
