@@ -118,7 +118,7 @@ def send_signal():
                 continue
             signal = analyze_market(prices)
             bot.send_message(TELEGRAM_CHAT_ID, f"📢 {coin.upper()} Signal:\n{signal}")
-        time.sleep(3600)  # wait 1 hour
+        time.sleep(360)  # wait 1 hour
 
 # ✅ Routes
 @app.route('/')
