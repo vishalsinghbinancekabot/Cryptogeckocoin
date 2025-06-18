@@ -92,6 +92,13 @@ def analyze_market(prices):
 
     print(f"🔍 Price: {current_price}, RSI: {rsi:.2f}, MACD: {macd:.2f}, Signal: {signal_line:.2f}")
 
+    # ✅ PRICE-BASED SIGNAL LOGIC
+    if current_price > 70000:
+        return f"🔴 PRICE ALERT | SELL {current_price:.2f} > 70000\nRSI: {rsi:.2f}, MACD: {macd:.2f}"
+    elif current_price < 60000:
+        return f"🟢 PRICE ALERT | BUY {current_price:.2f} < 60000\nRSI: {rsi:.2f}, MACD: {macd:.2f}"
+
+    # ✅ INDICATOR-BASED STRATEGY
     if rsi < 30 and macd > signal_line and ema9 > ema21 and current_price < lower:
         return f"💹 STRONG BUY\nRSI: {rsi:.2f}, MACD: {macd:.2f}, Price: ${current_price:.2f}"
     elif rsi > 70 and macd < signal_line and ema9 < ema21 and current_price > upper:
