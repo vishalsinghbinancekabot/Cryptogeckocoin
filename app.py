@@ -23,16 +23,16 @@ COINS = ["bitcoin", "ethereum", "solana", "bnb", "matic-network"]
 
 # --------------------- PRICE FETCH FUNCTION ---------------------
 def fetch_price_history(coin_id="bitcoin", days=3):
-    url = f"https://api.coingecko.com/api/v3/coins/{coin_id}/market_chart"
-    params = {
-        "vs_currency": "usd",
-        "days": days
+    url = f"https://api.coingecko.com/api/v3/coins/{coin_id}/market_chart?vs_currency=usd&days={days}"
+    
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (compatible; TelegramBot/1.0; +https://yourdomain.com/bot)'
     }
+
     try:
-        response = requests.get(url, params=params)
+        response = requests.get(url, headers=headers)  # ✅ use headers
         response.raise_for_status()
         data = response.json()
-        prices = [price[1] for price in data["prices"]]
 
         # 👉 YAHAN PRINT LAGAO
         print(f"📊 {coin_id} fetched {len(prices)} prices.")
@@ -121,7 +121,7 @@ def send_signal():
         except Exception as e:
             print("❌ Error in signal loop:", e)
         
-        time.sleep(30)  # ✅ 5. Har 1 ghnate me signal check
+        time.sleep(300)  # ✅ 5. Har 1 ghnate me signal check
 
 @app.route('/')
 def home():
