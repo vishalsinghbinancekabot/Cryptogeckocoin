@@ -127,11 +127,6 @@ def send_signal():
 def home():
     return "✅ Bot is running..."
     
-if __name__ == '__main__':
-    import os
-    PORT = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=PORT)
-    
 @app.route('/test-signal')
 def test_signal():
     output = []
@@ -161,4 +156,5 @@ def force_signal(coin, signal_type):
 if __name__ == '__main__':
     print("🚀 Starting bot...")
     threading.Thread(target=send_signal).start()
-    app.run(host="0.0.0.0", port=10000)
+    PORT = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=PORT)
