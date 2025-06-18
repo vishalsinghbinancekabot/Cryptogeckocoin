@@ -39,7 +39,7 @@ def fetch_price_history(coin_id="bitcoin", days=3):
     except Exception as e:
         print(f"❌ Error fetching data for {coin_id}:", e)
         return []
-------------- INDICATOR CALCULATIONS ---------------------
+# --------------------- INDICATOR CALCULATIONS ---------------------
 def calculate_rsi(data, period=14):
     series = pd.Series(data)
     delta = series.diff()
