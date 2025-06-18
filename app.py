@@ -1,22 +1,21 @@
 import os
 import time
-import threading
 import requests
-import pandas as pd
-import numpy as np
+import threading
 from flask import Flask
 from dotenv import load_dotenv
 import telebot
 
 load_dotenv()
 
-print("🛠️ App file loaded!") 
+print("🛠️ Bot Loaded!")
 
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
 bot = telebot.TeleBot(TELEGRAM_BOT_TOKEN)
 app = Flask(__name__)
+
 
 COINS = ["bitcoin", "ethereum", "solana", "binancecoin", "polygon"]
 
