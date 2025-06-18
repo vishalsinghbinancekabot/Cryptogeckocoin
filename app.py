@@ -4,7 +4,6 @@ import threading
 import requests
 import pandas as pd
 import numpy as np
-import datetime
 from flask import Flask
 from dotenv import load_dotenv
 import telebot
@@ -15,42 +14,37 @@ TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
 bot = telebot.TeleBot(TELEGRAM_BOT_TOKEN)
-
-bot.send_message(TELEGRAM_CHAT_ID, "✅ Test message from your bot.")
 app = Flask(__name__)
 
 COINS = ["bitcoin", "ethereum", "solana", "bnb", "matic-network"]
-
 last_fetch_time = {}
 
+# ✅ Should Fetch Logic
 def should_fetch(coin):
     now = time.time()
-    if coin not in last_fetch_time or now - last_fetch_time[coin] > 3600:  # 1 ghante me 1 baar
+    if coin not in last_fetch_time or now - last_fetch_time[coin] > 3600:
         last_fetch_time[coin] = now
         return True
     return False
-    
-# --------------------- PRICE FETCH FUNCTION ---------------------
+
+# ✅ Fetch Price History
 def fetch_price_history(coin_id="bitcoin", days=3):
     url = f"https://api.coingecko.com/api/v3/coins/{coin_id}/market_chart?vs_currency=usd&days={days}"
-    
     headers = {
-        'User-Agent': 'Mozilla/5.0 (compatible; TelegramBot/1.0; +https://yourdomain.com/bot)'
+        'User-Agent': 'Mozilla/5.0 (compatible; TelegramBot/1.0; +https://yourbot.com)'
     }
-
     try:
-        response = requests.get(url, headers=headers)  # ✅ use headers
+        response = requests.get(url, headers=headers)
         response.raise_for_status()
         data = response.json()
-
-        # 👉 YAHAN PRINT LAGAO
+        prices = [p[1] for p in data["prices"]]
         print(f"📊 {coin_id} fetched {len(prices)} prices.")
-
         return prices
     except Exception as e:
-        print(f"❌ Error fetching data for {coin_id}:", e)
+        print(f"❌ Error fetching data for {coin_id}: {e}")
         return []
-# --------------------- INDICATOR CALCULATIONS ---------------------
+
+# ✅ Indicators
 def calculate_rsi(data, period=14):
     series = pd.Series(data)
     delta = series.diff()
@@ -84,7 +78,7 @@ def calculate_bollinger_bands(data):
     lower = sma - 2 * std
     return upper.iloc[-1], lower.iloc[-1]
 
-# --------------------- ANALYZE & SEND SIGNAL ---------------------
+# ✅ Analyze Market
 def analyze_market(prices):
     if len(prices) < 26:
         print(f"⚠️ Not enough data | Got only {len(prices)} prices")
@@ -96,7 +90,6 @@ def analyze_market(prices):
     ema9, ema21 = calculate_ema_crossover(prices)
     upper, lower = calculate_bollinger_bands(prices)
 
-    # 👉 YAHAN PRINT LAGAO
     print(f"🔍 Price: {current_price}, RSI: {rsi:.2f}, MACD: {macd:.2f}, Signal: {signal_line:.2f}")
 
     if rsi < 30 and macd > signal_line and ema9 > ema21 and current_price < lower:
@@ -106,34 +99,21 @@ def analyze_market(prices):
     else:
         return f"⚖️ HOLD\nRSI: {rsi:.2f}, MACD: {macd:.2f}, Price: ${current_price:.2f}"
 
-import threading
-
+# ✅ Signal Sending Thread
 def send_signal():
     print("📡 Signal loop started...")
-    # Signal logic here
+    while True:
+        for coin in COINS:
+            if not should_fetch(coin):
+                continue
+            prices = fetch_price_history(coin)
+            if not prices:
+                continue
+            signal = analyze_market(prices)
+            bot.send_message(TELEGRAM_CHAT_ID, f"📢 {coin.upper()} Signal:\n{signal}")
+        time.sleep(3600)  # wait 1 hour
 
-# Start the loop in background
-threading.Thread(target=send_signal).start()
-
-def should_fetch(coin):
-    now = time.time()
-    if coin not in last_fetch_time or now - last_fetch_time[coin] > 3600:
-        last_fetch_time[coin] = now
-        return True
-    return False
-
-def fetch_price_history(coin_id="bitcoin", days=3):
-    url = f"https://api.coingecko.com/api/v3/coins/{coin_id}/market_chart?vs_currency=usd&days={days}"
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (compatible; TelegramBot/1.0; +https://yourbot.com)'
-    }
-    try:
-        response = requests.get(url, headers=headers)
-        response.raise_for_status()
-        return response.json()['prices']
-    except Exception as e:
-        print(f"❌ Error fetching data for {coin_id}: {e}")
-        return []
+# ✅ Routes
 @app.route('/')
 def home():
     return "✅ Bot is running..."
@@ -149,7 +129,7 @@ def test_signal():
         bot.send_message(TELEGRAM_CHAT_ID, f"🧪 {coin.upper()} Test:\n{signal}")
         output.append(f"{coin}: Sent")
     return "\n".join(output)
-   
+
 @app.route('/force-signal/<coin>/<signal_type>')
 def force_signal(coin, signal_type):
     signal_type = signal_type.lower()
@@ -159,11 +139,11 @@ def force_signal(coin, signal_type):
         signal = f"🔻 FORCED SELL SIGNAL\nCoin: {coin.upper()}\nThis is a test sell signal."
     else:
         return "❌ Invalid signal type. Use 'buy' or 'sell'."
-    
+
     bot.send_message(TELEGRAM_CHAT_ID, f"📢 {coin.upper()} SIGNAL:\n{signal}")
     return f"✅ Forced {signal_type.upper()} signal sent for {coin.upper()}"
 
-
+# ✅ Launch Bot
 if __name__ == '__main__':
     print("🚀 Starting bot...")
     threading.Thread(target=send_signal).start()
