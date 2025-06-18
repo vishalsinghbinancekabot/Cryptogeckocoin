@@ -21,6 +21,14 @@ app = Flask(__name__)
 
 COINS = ["bitcoin", "ethereum", "solana", "bnb", "matic-network"]
 
+last_fetch_time = {}
+
+def should_fetch(coin):
+    now = time.time()
+    if coin not in last_fetch_time or now - last_fetch_time[coin] > 3600:  # 1 ghante me 1 baar
+        last_fetch_time[coin] = now
+        return True
+    return False
 # --------------------- PRICE FETCH FUNCTION ---------------------
 def fetch_price_history(coin_id="bitcoin", days=3):
     url = f"https://api.coingecko.com/api/v3/coins/{coin_id}/market_chart?vs_currency=usd&days={days}"
