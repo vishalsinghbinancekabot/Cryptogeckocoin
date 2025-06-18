@@ -15,6 +15,8 @@ TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
 bot = telebot.TeleBot(TELEGRAM_BOT_TOKEN)
+
+bot.send_message(TELEGRAM_CHAT_ID, "✅ Test message from your bot.")
 app = Flask(__name__)
 
 COINS = ["bitcoin", "ethereum", "solana", "bnb", "matic-network"]
