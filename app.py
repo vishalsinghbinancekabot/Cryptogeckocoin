@@ -112,7 +112,7 @@ def send_signal():
         except Exception as e:
             print("❌ Error in signal loop:", e)
         
-        time.sleep(3600)  # ✅ 5. Har 1 ghnate me signal check
+        time.sleep(30)  # ✅ 5. Har 1 ghnate me signal check
 
 @app.route('/')
 def home():
