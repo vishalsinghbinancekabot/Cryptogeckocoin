@@ -89,23 +89,30 @@ def analyze_market(prices):
         return f"⚖️ HOLD\nRSI: {rsi:.2f}, MACD: {macd:.2f}, Price: ${current_price:.2f}"
 
 def send_signal():
-    print("📡 Signal loop started...")
+    print("📡 Signal loop started...")  # ✅ 1. Start indicator
     while True:
         try:
             for coin in COINS:
                 prices = fetch_price_history(coin)
                 if not prices:
+                    print(f"⚠️ No prices for {coin}")
                     continue
+
+                # ✅ 2. Prices check karne ke liye
+                print(f"🔍 {coin} prices: {prices[-5:]}")
+
                 signal = analyze_market(prices)
-                if "BUY" in signal or "SELL" in signal:
-                    bot.send_message(TELEGRAM_CHAT_ID, f"📢 {coin.upper()} SIGNAL:\n{signal}")
-                    print(f"✅ Sent signal for {coin}")
-                else:
-                    print(f"🟡 HOLD for {coin}")
+
+                # ✅ 3. Analyze ke baad kya aaya
+                print(f"🧠 Analyzed Signal for {coin}: {signal}")
+
+                # ✅ 4. Always send signal for now
+                bot.send_message(TELEGRAM_CHAT_ID, f"📢 {coin.upper()}:\n{signal}")
+                print(f"✅ Sent signal for {coin}")
         except Exception as e:
             print("❌ Error in signal loop:", e)
-        time.sleep(300)  # 5 minutes
-
+        
+        time.sleep(3600)  # ✅ 5. Har 1 ghnate me signal check
 # --------------------- FLASK ROUTES ---------------------
 @app.route('/')
 def home():
