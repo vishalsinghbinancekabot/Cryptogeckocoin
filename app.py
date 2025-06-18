@@ -37,14 +37,28 @@ def fetch_price_history(coin_id="bitcoin", days=3):
     }
     try:
         response = requests.get(url, headers=headers)
+        print(f"🔗 URL: {url}")
+        print(f"📥 Status: {response.status_code}")
+        print(f"📥 Partial Response: {response.text[:150]}")
+
         response.raise_for_status()
         data = response.json()
-        prices = [p[1] for p in data["prices"]]
+
+        # ✅ Check if "prices" key exists
+        if "prices" not in data:
+            print(f"⚠️ 'prices' key not in API response for {coin_id}")
+            return []
+
+        prices_raw = data["prices"]
+        prices = [p[1] for p in prices_raw if len(p) == 2]
+
         print(f"📊 {coin_id} fetched {len(prices)} prices.")
         return prices
+
     except Exception as e:
         print(f"❌ Error fetching data for {coin_id}: {e}")
         return []
+
 
 # ✅ Indicators
 def calculate_rsi(data, period=14):
