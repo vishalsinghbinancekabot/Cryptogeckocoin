@@ -113,7 +113,7 @@ def send_signal():
             print("❌ Error in signal loop:", e)
         
         time.sleep(3600)  # ✅ 5. Har 1 ghnate me signal check
-# --------------------- FLASK ROUTES ---------------------
+
 @app.route('/')
 def home():
     return "✅ Bot is running..."
@@ -143,7 +143,8 @@ def force_signal(coin, signal_type):
     bot.send_message(TELEGRAM_CHAT_ID, f"📢 {coin.upper()} SIGNAL:\n{signal}")
     return f"✅ Forced {signal_type.upper()} signal sent for {coin.upper()}"
 
-# --------------------- RUNNING ---------------------
+
 if __name__ == '__main__':
+    print("🚀 Starting bot...")
     threading.Thread(target=send_signal).start()
     app.run(host="0.0.0.0", port=10000)
