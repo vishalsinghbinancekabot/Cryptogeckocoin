@@ -20,23 +20,25 @@ app = Flask(__name__)
 COINS = ["bitcoin", "ethereum", "solana", "bnb", "matic-network"]
 
 # --------------------- PRICE FETCH FUNCTION ---------------------
-def fetch_price_history(coin_id="bitcoin", days=2):
+def fetch_price_history(coin_id="bitcoin", days=3):
     url = f"https://api.coingecko.com/api/v3/coins/{coin_id}/market_chart"
     params = {
         "vs_currency": "usd",
-        "days": days  # interval=hourly by default for 2-90 days
+        "days": days
     }
     try:
         response = requests.get(url, params=params)
         response.raise_for_status()
         data = response.json()
         prices = [price[1] for price in data["prices"]]
+
+        print(f"📊 {coin_id} fetched {len(prices)} prices.")
+
         return prices
     except Exception as e:
         print(f"❌ Error fetching data for {coin_id}:", e)
         return []
-
-# --------------------- INDICATOR CALCULATIONS ---------------------
+------------- INDICATOR CALCULATIONS ---------------------
 def calculate_rsi(data, period=14):
     series = pd.Series(data)
     delta = series.diff()
