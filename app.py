@@ -106,6 +106,15 @@ def analyze_market(prices):
     else:
         return f"⚖️ HOLD\nRSI: {rsi:.2f}, MACD: {macd:.2f}, Price: ${current_price:.2f}"
 
+import threading
+
+def send_signal():
+    print("📡 Signal loop started...")
+    # Signal logic here
+
+# Start the loop in background
+threading.Thread(target=send_signal).start()
+
 def should_fetch(coin):
     now = time.time()
     if coin not in last_fetch_time or now - last_fetch_time[coin] > 3600:
