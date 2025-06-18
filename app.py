@@ -29,6 +29,7 @@ def should_fetch(coin):
         last_fetch_time[coin] = now
         return True
     return False
+    
 # --------------------- PRICE FETCH FUNCTION ---------------------
 def fetch_price_history(coin_id="bitcoin", days=3):
     url = f"https://api.coingecko.com/api/v3/coins/{coin_id}/market_chart?vs_currency=usd&days={days}"
