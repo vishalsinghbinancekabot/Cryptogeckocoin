@@ -16,10 +16,11 @@ def send_telegram_message(text):
         print(f"❌ Failed to send message: {e}")
         return False
 
-def send_telegram_image(caption):
+def send_telegram_image(caption, image_path):
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendPhoto"
     try:
-        with open(IMAGE_PATH, 'rb') as photo:
+        print(f"📤 Sending image: {image_path}")
+        with open(image_path, 'rb') as photo:
             files = {'photo': photo}
             data = {
                 'chat_id': TELEGRAM_CHAT_ID,
