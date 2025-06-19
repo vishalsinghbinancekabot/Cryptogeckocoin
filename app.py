@@ -55,6 +55,9 @@ def fetch_price_history(coin_id):
         response = requests.get(url)
         data = response.json()
 
+        print(f"📡 API URL: {url}")
+        print(f"📦 API Response: {data}")
+
         if "prices" not in data:
             print(f"⚠️ 'prices' key not in API response for {coin_id}")
             return []
