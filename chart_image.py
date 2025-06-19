@@ -6,6 +6,11 @@ def generate_chart(df, symbol, signal):
         df[col] = pd.to_numeric(df[col], errors='coerce')
     df.dropna(inplace=True)
 
+    # ❗️Check if data is empty after cleaning
+    if df.empty or len(df) < 10:
+        print(f"⚠️ Not enough data to generate chart for {symbol}. Skipping...")
+        return None
+
     df_chart = pd.DataFrame({
         'Open': df['open'],
         'High': df['high'],
