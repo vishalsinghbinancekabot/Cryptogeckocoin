@@ -3,9 +3,13 @@ import pandas as pd
 import os
 
 def generate_chart(df, coin, signal_type, save_path="chart.png"):
+    if 'timestamp' not in df.columns:
+        raise ValueError("DataFrame missing 'timestamp' column")
+    if 'ema12' not in df.columns or 'ema26' not in df.columns:
+        raise ValueError("EMA columns missing in DataFrame")
+
     df_chart = df.copy()
     df_chart.index = pd.to_datetime(df_chart['timestamp'], unit='ms')
-
     df_chart = df_chart[['open', 'high', 'low', 'close', 'volume']]
     df_chart.columns = ['Open', 'High', 'Low', 'Close', 'Volume']
 
