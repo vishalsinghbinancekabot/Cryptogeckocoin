@@ -1,5 +1,3 @@
-📁 FILE: logger.py
-
 VishalX ProBot - Logger for signal history
 
 import csv import os from datetime import datetime
