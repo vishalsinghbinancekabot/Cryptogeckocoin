@@ -1,3 +1,5 @@
+import os
+
 # --- Coin & Timeframe Settings ---
 COINS = [
     "BTCUSDT", "ETHUSDT", "SOLUSDT", "BNBUSDT", "MATICUSDT",
@@ -8,10 +10,8 @@ COINS = [
 ]
 INTERVALS = ["5m", "15m", "1h", "1d"]
 CANDLE_LIMIT = 100
-
-# --- Telegram Bot Credentials ---
-TELEGRAM_TOKEN = "your_actual_bot_token"
-TELEGRAM_CHAT_ID = "your_actual_chat_id"
-
-# --- Bot Loop Timing ---
 CHECK_INTERVAL_SECONDS = 900
+
+# --- Telegram Credentials from Env ---
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
