@@ -1,202 +1,117 @@
-import os
-import time
 import requests
-import threading
-from flask import Flask
-from dotenv import load_dotenv
-import telebot
-import pandas as pd
+import numpy as np
+from telegram import Bot
+import time
+import os
 
-load_dotenv()
+# 🔧 ENV VARIABLES (add these in environment or manually set)
+TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
+CHAT_ID = os.environ.get("CHAT_ID")
+bot = Bot(token=TELEGRAM_TOKEN)
 
-print("🛠️ Bot Loaded!")
+# ✅ Configuration
+SYMBOLS = ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT"]
+INTERVAL = "1h"
+LIMIT = 100
 
-TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
+# 🟡 Fetch historical klines
+def get_klines(symbol, interval, limit):
+    url = f"https://api.binance.com/api/v3/klines?symbol={symbol}&interval={interval}&limit={limit}"
+    data = requests.get(url).json()
+    close_prices = [float(candle[4]) for candle in data]
+    return close_prices
 
-bot = telebot.TeleBot(TELEGRAM_BOT_TOKEN)
-app = Flask(__name__)
+# 🧠 EMA Calculation
+def calculate_ema(prices, period):
+    prices = np.array(prices)
+    weights = np.exp(np.linspace(-1., 0., period))
+    weights /= weights.sum()
+    a = np.convolve(prices, weights, mode='full')[:len(prices)]
+    return a[-1]
 
+# 🧠 RSI Calculation
+def calculate_rsi(prices, period=14):
+    prices = np.array(prices)
+    delta = np.diff(prices)
+    gain = np.where(delta > 0, delta, 0).mean()
+    loss = -np.where(delta < 0, delta, 0).mean()
+    if loss == 0:
+        return 100
+    rs = gain / loss
+    return 100 - (100 / (1 + rs))
 
-COINS = ["bitcoin", "ethereum", "solana", "binancecoin", "polygon"]
+# 🧠 MACD Calculation
+def calculate_macd(prices):
+    ema12 = calculate_ema(prices, 12)
+    ema26 = calculate_ema(prices, 26)
+    return ema12 - ema26
 
-last_fetch_time = {}
+# 🧠 Bollinger Bands
+def calculate_bollinger(prices, period=20):
+    prices = np.array(prices[-period:])
+    sma = np.mean(prices)
+    std = np.std(prices)
+    upper = sma + (2 * std)
+    lower = sma - (2 * std)
+    return upper, lower
 
-# ✅ Should Fetch Logic
-def should_fetch(coin):
-    now = time.time()
-    if coin not in last_fetch_time or now - last_fetch_time[coin] > 3600:
-        last_fetch_time[coin] = now
-        return True
-    return False
+# 📊 Signal Analysis
+def analyze(prices):
+    signals = []
 
-# ✅ Fetch Current Price
-def fetch_current_price(coin_id):
-    url = f"https://api.coingecko.com/api/v3/coins/{coin_id}/market_chart?vs_currency=usd&days=1"
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (compatible; TelegramBot/1.0)'
-    }
-    try:
-        response = requests.get(url, headers=headers, timeout=10)
-        print(f"🔗 Fetching {coin_id}: {url}")
-        print(f"📥 Status: {response.status_code}")
-        print(f"📥 Response: {response.text}")
-
-        data = response.json()
-        return data[coin_id]["usd"]
-    except Exception as e:
-        print(f"❌ Error fetching price for {coin_id}: {e}")
-        return None
-
-def fetch_price_history(coin_id):
-    try:
-        url = f"https://api.coingecko.com/api/v3/coins/{coin_id}/market_chart?vs_currency=usd&days=7"
-        response = requests.get(url)
-        data = response.json()
-        print(f"🟡 DEBUG: {coin_id} API Response:\n{data}")  # ✅ Ye line zaroor add karo
-        
-        # 🔍 Debug prints:
-        print(f"📡 API URL: {url}")
-        print(f"📦 API Response keys: {list(data.keys())}")
-        if isinstance(data, dict):
-            # Logging first or full snippet
-            first_item = next(iter(data.items()))
-            print(f"📄 Sample data entry: {first_item}")
-
-        if "prices" not in data:
-            print(f"⚠️ 'prices' key not in API response for {coin_id}")
-            return []
-
-        prices = [price[1] for price in data["prices"]]
-        print(f"✅ Fetched {len(prices)} prices for {coin_id}")
-        return prices
-
-    except Exception as e:
-        print(f"❌ Error fetching price history for {coin_id}: {e}")
-        return []
-        
-# ✅ Indicators
-def calculate_rsi(data, period=14):
-    series = pd.Series(data)
-    delta = series.diff()
-    gain = delta.where(delta > 0, 0)
-    loss = -delta.where(delta < 0, 0)
-    avg_gain = gain.rolling(window=period).mean()
-    avg_loss = loss.rolling(window=period).mean()
-    rs = avg_gain / avg_loss
-    rsi = 100 - (100 / (1 + rs))
-    return rsi.iloc[-1]
-
-def calculate_macd(data):
-    series = pd.Series(data)
-    ema12 = series.ewm(span=12, adjust=False).mean()
-    ema26 = series.ewm(span=26, adjust=False).mean()
-    macd = ema12 - ema26
-    signal = macd.ewm(span=9, adjust=False).mean()
-    return macd.iloc[-1], signal.iloc[-1]
-
-def calculate_ema_crossover(data):
-    series = pd.Series(data)
-    ema9 = series.ewm(span=9, adjust=False).mean()
-    ema21 = series.ewm(span=21, adjust=False).mean()
-    return ema9.iloc[-1], ema21.iloc[-1]
-
-def calculate_bollinger_bands(data):
-    series = pd.Series(data)
-    sma = series.rolling(window=20).mean()
-    std = series.rolling(window=20).std()
-    upper = sma + 2 * std
-    lower = sma - 2 * std
-    return upper.iloc[-1], lower.iloc[-1]
-
-# ✅ Analyze Market
-def analyze_market(prices):
-    if len(prices) < 26:
-        print(f"⚠️ Not enough data | Got only {len(prices)} prices")
-        return "⚠️ Not enough data"
-
-    current_price = prices[-1]
+    # RSI
     rsi = calculate_rsi(prices)
-    macd, signal_line = calculate_macd(prices)
-    ema9, ema21 = calculate_ema_crossover(prices)
-    upper, lower = calculate_bollinger_bands(prices)
+    if rsi < 30:
+        signals.append("RSI: 🔼 Buy")
+    elif rsi > 70:
+        signals.append("RSI: 🔽 Sell")
 
-    print(f"🔍 Price: {current_price}, RSI: {rsi:.2f}, MACD: {macd:.2f}, Signal: {signal_line:.2f}")
-
-    # ✅ PRICE-BASED SIGNAL LOGIC
-    if current_price > 70000:
-        return f"🔴 PRICE ALERT | SELL {current_price:.2f} > 70000\nRSI: {rsi:.2f}, MACD: {macd:.2f}"
-    elif current_price < 60000:
-        return f"🟢 PRICE ALERT | BUY {current_price:.2f} < 60000\nRSI: {rsi:.2f}, MACD: {macd:.2f}"
-
-    # ✅ INDICATOR-BASED STRATEGY
-    if rsi < 30 and macd > signal_line and ema9 > ema21 and current_price < lower:
-        return f"💹 STRONG BUY\nRSI: {rsi:.2f}, MACD: {macd:.2f}, Price: ${current_price:.2f}"
-    elif rsi > 70 and macd < signal_line and ema9 < ema21 and current_price > upper:
-        return f"🔻 STRONG SELL\nRSI: {rsi:.2f}, MACD: {macd:.2f}, Price: ${current_price:.2f}"
+    # MACD
+    macd = calculate_macd(prices)
+    if macd > 0:
+        signals.append("MACD: 🔼 Buy")
     else:
-        return f"⚖️ HOLD\nRSI: {rsi:.2f}, MACD: {macd:.2f}, Price: ${current_price:.2f}"
+        signals.append("MACD: 🔽 Sell")
 
-# ✅ Signal Sending Thread
-def send_signal():
-    print("📡 Signal loop started...")
-    while True:
-        for coin in COINS:
-            if not should_fetch(coin):
-                continue
-            prices = fetch_price_history(coin)
-            if not prices:
-                continue
-            signal = analyze_market(prices)
-            bot.send_message(TELEGRAM_CHAT_ID, f"📢 {coin.upper()} Signal:\n{signal}")
-        time.sleep(150)  # wait 1 hour
+    # EMA Crossover
+    ema10 = calculate_ema(prices, 10)
+    ema20 = calculate_ema(prices, 20)
+    if ema10 > ema20:
+        signals.append("EMA: 🔼 Buy")
+    else:
+        signals.append("EMA: 🔽 Sell")
 
-# ✅ Routes
-@app.route('/')
-def home():
-    return "✅ Bot is running..."
-    
-@app.route('/test-signal')
-def test_signal():
-    print("🛑 TEST SIGNAL ROUTE CALLED")
-    output = []
-    for coin in COINS:
+    # Bollinger Band
+    upper, lower = calculate_bollinger(prices)
+    if prices[-1] < lower:
+        signals.append("Bollinger: 🔼 Buy")
+    elif prices[-1] > upper:
+        signals.append("Bollinger: 🔽 Sell")
+
+    return signals
+
+# 🚀 Main logic
+def run_bot():
+    for symbol in SYMBOLS:
         try:
-            print(f"🧪 Testing {coin}...")
-            prices = fetch_price_history(coin)
-            print("🔎 In test_signal, prices type:", type(prices), "length:", len(prices))
-            if len(prices) > 0:
-                print("  First items:", prices[:5])
+            prices = get_klines(symbol, INTERVAL, LIMIT)
+            signals = analyze(prices)
+            buy_count = sum("Buy" in s for s in signals)
+            sell_count = sum("Sell" in s for s in signals)
+
+            if buy_count >= 3:
+                msg = f"✅ *BUY Signal for {symbol}*\n" + "\n".join(signals)
+            elif sell_count >= 3:
+                msg = f"⚠️ *SELL Signal for {symbol}*\n" + "\n".join(signals)
             else:
-                print("  Returned an empty list for", coin)
-            if not prices:
-                output.append(f"{coin}: ❌ No prices")
-                continue
-            signal = analyze_market(prices)
-            print(f"📤 Sending signal for {coin}: {signal}")
-            bot.send_message(TELEGRAM_CHAT_ID, f"🧪 {coin.upper()} Test:\n{signal}")
-            output.append(f"{coin}: ✅ Sent")
+                msg = f"ℹ️ *Hold for {symbol}*\n" + "\n".join(signals)
+
+            print(msg)
+            bot.send_message(chat_id=CHAT_ID, text=msg, parse_mode="Markdown")
         except Exception as e:
-            print(f"❌ Error in {coin}: {e}")
-            output.append(f"{coin}: ❌ Error")
-    return "<br>".join(output)
+            print(f"❌ Error for {symbol}: {e}")
 
-@app.route('/force-signal/<coin>/<signal_type>')
-def force_signal(coin, signal_type):
-    signal_type = signal_type.lower()
-    if signal_type == "buy":
-        signal = f"💹 FORCED BUY SIGNAL\nCoin: {coin.upper()}\nThis is a test buy signal."
-    elif signal_type == "sell":
-        signal = f"🔻 FORCED SELL SIGNAL\nCoin: {coin.upper()}\nThis is a test sell signal."
-    else:
-        return "❌ Invalid signal type. Use 'buy' or 'sell'."
-
-    bot.send_message(TELEGRAM_CHAT_ID, f"📢 {coin.upper()} SIGNAL:\n{signal}")
-    return f"✅ Forced {signal_type.upper()} signal sent for {coin.upper()}"
-
-# ✅ Launch Bot
-if __name__ == '__main__':
-    print("🚀 Starting bot...")
-    threading.Thread(target=send_signal).start()
-    PORT = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=PORT)
+# 🔁 Run every hour
+while True:
+    run_bot()
+    time.sleep(3600)  # run every 1 hour
