@@ -2,17 +2,7 @@ services:
   - type: web
     name: vishalx-probot
     env: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "python app/main.py"
     plan: free
-    region: singapore  # ya us-central, frankfurt, etc. as per preference
-
-    buildCommand: pip install -r requirements.txt
-
-    startCommand: python main.py
-
-    envVars:
-      - key: TELEGRAM_BOT_TOKEN
-        value: your_bot_token_here
-      - key: COINGECKO_API_URL
-        value: https://api.coingecko.com/api/v3/
-      - key: OTHER_CONFIG
-        value: anything_else_you_need
+    autoDeploy: true
