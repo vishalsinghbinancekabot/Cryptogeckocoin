@@ -22,6 +22,13 @@ COINS = ["bitcoin", "ethereum", "solana", "binancecoin", "polygon"]
 
 last_fetch_time = {}
 
+# ✅ Should Fetch Logic
+def should_fetch(coin):
+    now = time.time()
+    if coin not in last_fetch_time or now - last_fetch_time[coin] > 3600:
+        last_fetch_time[coin] = now
+        return True
+    return False
 
 # ✅ Fetch Current Price
 def fetch_current_price(coin_id):
