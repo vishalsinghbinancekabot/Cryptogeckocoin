@@ -60,25 +60,26 @@ def process():
             if df is None or df.empty:
                 continue
 
-            df = calculate_indicators(df)
+try:
+    df = calculate_indicators(df)
+    df.dropna(inplace=True)
 
-            # 🔒 Clean after indicators too (important!)
-            df.dropna(inplace=True)
+    score = get_signal_score(df)
+    signal_type = get_signal_type(score)
+    trade_type = detect_trade_type(df)
 
-            score = get_signal_score(df)
-            signal_type = get_signal_type(score)
-            trade_type = detect_trade_type(df)
-
-            if signal_type in ["BUY", "SELL"]:
-                chart_path = generate_chart(df, coin, signal_type)
-                if chart_path:
-                    caption = f"*{coin}* ({interval})\n📊 Signal: *{signal_type}*\n⚡ Type: {trade_type}\n🎯 Score: {score}/100"
-                    send_telegram_image(caption, chart_path)
-                    log_signal(coin, interval, signal_type, trade_type, score)
-                else:
-                    print(f"⛔ Chart not sent for {coin} due to invalid data.")
-            else:
-                print(f"ℹ️ No strong signal for {coin} ({score}/100)")
+    if signal_type in ["BUY", "SELL"]:
+        chart_path = generate_chart(df, coin, signal_type)
+        if chart_path:
+            caption = f"*{coin}* ({interval})\n📊 Signal: *{signal_type}*\n⚡ Type: {trade_type}*\n🎯 Score: {score}/100"
+            send_telegram_image(caption, chart_path)
+            log_signal(coin, interval, signal_type, trade_type, score)
+        else:
+            print(f"⛔ Chart not sent for {coin} due to invalid data.")
+    else:
+        print(f"ℹ️ No strong signal for {coin} ({score}/100)")
+except Exception as e:
+    print(f"❌ Error processing {coin}@{interval}: {e}")
 
 def run():
     while True:
