@@ -5,6 +5,7 @@ import threading
 from flask import Flask
 from dotenv import load_dotenv
 import telebot
+import pandas as pd
 
 load_dotenv()
 
