@@ -48,15 +48,19 @@ def fetch_current_price(coin_id):
         print(f"❌ Error fetching price for {coin_id}: {e}")
         return None
 
-# ✅ Fetch Price History
 def fetch_price_history(coin_id):
     try:
         url = f"https://api.coingecko.com/api/v3/coins/{coin_id}/market_chart?vs_currency=usd&days=7"
         response = requests.get(url)
         data = response.json()
 
+        # 🔍 Debug prints:
         print(f"📡 API URL: {url}")
-        print(f"📦 API Response: {data}")
+        print(f"📦 API Response keys: {list(data.keys())}")
+        if isinstance(data, dict):
+            # Logging first or full snippet
+            first_item = next(iter(data.items()))
+            print(f"📄 Sample data entry: {first_item}")
 
         if "prices" not in data:
             print(f"⚠️ 'prices' key not in API response for {coin_id}")
@@ -65,6 +69,7 @@ def fetch_price_history(coin_id):
         prices = [price[1] for price in data["prices"]]
         print(f"✅ Fetched {len(prices)} prices for {coin_id}")
         return prices
+
     except Exception as e:
         print(f"❌ Error fetching price history for {coin_id}: {e}")
         return []
