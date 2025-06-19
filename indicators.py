@@ -19,7 +19,7 @@ def calculate_indicators(df):
     df['ema12'] = ta.trend.EMAIndicator(df['close'], window=12).ema_indicator()
     df['ema26'] = ta.trend.EMAIndicator(df['close'], window=26).ema_indicator()
 
-    # SuperTrend (using STC as proxy)
+    # SuperTrend proxy
     df['supertrend'] = ta.trend.STCIndicator(df['close'], fillna=True).stc()
 
     # ADX
@@ -38,5 +38,8 @@ def calculate_indicators(df):
     # Volume Spike
     df['volume_avg'] = df['volume'].rolling(window=20).mean()
     df['volume_spike'] = df['volume'] > (1.5 * df['volume_avg'])
+
+    # Optional: Clean missing values from initial rows
+    df.dropna(inplace=True)
 
     return df
