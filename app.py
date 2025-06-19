@@ -1,5 +1,3 @@
-VishalX ProBot - Main Controller Script
-
 import time import requests import pandas as pd from config import COINS, INTERVALS, CANDLE_LIMIT, CHECK_INTERVAL_SECONDS from indicators import calculate_indicators from strategy import get_signal_score, get_signal_type from trade_type import detect_trade_type from chart_image import generate_chart from bot import send_telegram_message, send_telegram_image from logger import log_signal
 
 BINANCE_URL = "https://api.binance.com/api/v3/klines"
