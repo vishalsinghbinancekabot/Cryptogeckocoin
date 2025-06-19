@@ -1,5 +1,3 @@
-# 📁 FILE: indicators.py
-
 import pandas as pd
 import ta
 
