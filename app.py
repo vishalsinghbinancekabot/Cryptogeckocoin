@@ -3,8 +3,9 @@ import numpy as np
 from telegram import Bot
 import time
 import os
+import asyncio
 
-# 🔧 ENV VARIABLES (add these in environment or manually set)
+# 🔧 ENV VARIABLES (from Render.com env settings)
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
 CHAT_ID = os.environ.get("CHAT_ID")
 bot = Bot(token=TELEGRAM_TOKEN)
@@ -90,8 +91,8 @@ def analyze(prices):
 
     return signals
 
-# 🚀 Main logic
-def run_bot():
+# 🚀 Main logic (now async)
+async def run_bot():
     for symbol in SYMBOLS:
         try:
             prices = get_klines(symbol, INTERVAL, LIMIT)
@@ -107,11 +108,17 @@ def run_bot():
                 msg = f"ℹ️ *Hold for {symbol}*\n" + "\n".join(signals)
 
             print(msg)
-            bot.send_message(chat_id=CHAT_ID, text=msg, parse_mode="Markdown")
+            await bot.send_message(chat_id=CHAT_ID, text=msg, parse_mode="Markdown")
+
         except Exception as e:
             print(f"❌ Error for {symbol}: {e}")
 
-# 🔁 Run every hour
-while True:
-    run_bot()
-    time.sleep(3600)  # run every 1 hour
+# 🔁 Loop every 1 hour
+async def main():
+    while True:
+        await run_bot()
+        await asyncio.sleep(3600)  # 1 hour delay
+
+# 🟢 Run the bot
+if __name__ == "__main__":
+    asyncio.run(main())
