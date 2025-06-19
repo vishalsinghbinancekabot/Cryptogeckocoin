@@ -1,5 +1,3 @@
-📁 FILE: strategy.py
-
 VishalX ProBot - Signal Scoring Logic
 
 def get_signal_score(df): latest = df.iloc[-1] score = 0
