@@ -1,5 +1,3 @@
-📁 FILE: trade_type.py
-
 VishalX ProBot - Trade Type Detector
 
 def detect_trade_type(df): latest = df.iloc[-1] atr = latest['atr'] close = latest['close'] atr_percent = (atr / close) * 100
