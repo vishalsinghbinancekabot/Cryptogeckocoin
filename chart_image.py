@@ -1,5 +1,3 @@
-# 📁 FILE: chart_image.py
-
 import mplfinance as mpf
 import pandas as pd
 import os
