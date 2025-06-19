@@ -32,7 +32,7 @@ def should_fetch(coin):
 
 # ✅ Fetch Current Price
 def fetch_current_price(coin_id):
-    url = f"https://api.coingecko.com/api/v3/simple/price?ids={coin_id}&vs_currencies=usd"
+    url = f"https://api.coingecko.com/api/v3/coins/{coin_id}/market_chart?vs_currency=usd&days=1"
     headers = {
         'User-Agent': 'Mozilla/5.0 (compatible; TelegramBot/1.0)'
     }
