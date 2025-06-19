@@ -1,37 +1,29 @@
-import mplfinance as mpf
-import pandas as pd
-import os
+def generate_chart(df, symbol, signal_type):
+    import io
+    import mplfinance as mpf
 
-def generate_chart(df, coin, signal_type, save_path="chart.png"):
-    if 'timestamp' not in df.columns:
-        raise ValueError("DataFrame missing 'timestamp' column")
-    if 'ema12' not in df.columns or 'ema26' not in df.columns:
-        raise ValueError("EMA columns missing in DataFrame")
+    df_chart = df[["Open", "High", "Low", "Close", "Volume"]].copy()
 
-    df_chart = df.copy()
-    df_chart.index = pd.to_datetime(df_chart['timestamp'], unit='ms')
-    df_chart = df_chart[['open', 'high', 'low', 'close', 'volume']]
-    df_chart.columns = ['Open', 'High', 'Low', 'Close', 'Volume']
+    # ✅ Convert to float
+    df_chart["Open"] = pd.to_numeric(df_chart["Open"], errors="coerce")
+    df_chart["High"] = pd.to_numeric(df_chart["High"], errors="coerce")
+    df_chart["Low"] = pd.to_numeric(df_chart["Low"], errors="coerce")
+    df_chart["Close"] = pd.to_numeric(df_chart["Close"], errors="coerce")
+    df_chart["Volume"] = pd.to_numeric(df_chart["Volume"], errors="coerce")
 
-    ema12 = df['ema12']
-    ema26 = df['ema26']
+    # ✅ Remove rows with NaN after conversion
+    df_chart.dropna(inplace=True)
 
-    apds = [
-        mpf.make_addplot(ema12, color='cyan'),
-        mpf.make_addplot(ema26, color='magenta')
-    ]
+    df_chart.index.name = 'Date'
 
-    title = f"{coin} - Signal: {signal_type}"
-
+    # ✅ Save to buffer (for Telegram) OR path (for saving)
+    buf = io.BytesIO()
     mpf.plot(
         df_chart,
-        type='candle',
-        style='yahoo',
-        title=title,
-        ylabel='Price (USDT)',
+        type="candle",
+        style="yahoo",
         volume=True,
-        addplot=apds,
-        savefig=dict(fname=save_path, dpi=100, bbox_inches="tight")
+        savefig=dict(fname=buf, dpi=100, bbox_inches="tight")
     )
-
-    return os.path.exists(save_path)
+    buf.seek(0)
+    return buf
