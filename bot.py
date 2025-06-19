@@ -8,13 +8,27 @@ def send_telegram_message(text):
         "text": text,
         "parse_mode": "Markdown"
     }
-    response = requests.post(url, json=payload)
-    return response.status_code == 200
+    try:
+        response = requests.post(url, json=payload)
+        response.raise_for_status()
+        return True
+    except requests.exceptions.RequestException as e:
+        print(f"❌ Failed to send message: {e}")
+        return False
 
 def send_telegram_image(caption):
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendPhoto"
-    with open(IMAGE_PATH, 'rb') as photo:
-        files = {'photo': photo}
-        data = {'chat_id': TELEGRAM_CHAT_ID, 'caption': caption, 'parse_mode': 'Markdown'}
-        response = requests.post(url, files=files, data=data)
-    return response.status_code == 200
+    try:
+        with open(IMAGE_PATH, 'rb') as photo:
+            files = {'photo': photo}
+            data = {
+                'chat_id': TELEGRAM_CHAT_ID,
+                'caption': caption,
+                'parse_mode': 'Markdown'
+            }
+            response = requests.post(url, files=files, data=data)
+            response.raise_for_status()
+            return True
+    except Exception as e:
+        print(f"❌ Failed to send image: {e}")
+        return False
