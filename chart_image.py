@@ -1,29 +1,25 @@
-def generate_chart(df, symbol, signal_type):
-    import io
-    import mplfinance as mpf
+import pandas as pd
+import mplfinance as mpf
 
-    df_chart = df[["Open", "High", "Low", "Close", "Volume"]].copy()
+def generate_chart(df, symbol, signal):
+    for col in ['open', 'high', 'low', 'close', 'volume']:
+        df[col] = pd.to_numeric(df[col], errors='coerce')
+    df.dropna(inplace=True)
 
-    # ✅ Convert to float
-    df_chart["Open"] = pd.to_numeric(df_chart["Open"], errors="coerce")
-    df_chart["High"] = pd.to_numeric(df_chart["High"], errors="coerce")
-    df_chart["Low"] = pd.to_numeric(df_chart["Low"], errors="coerce")
-    df_chart["Close"] = pd.to_numeric(df_chart["Close"], errors="coerce")
-    df_chart["Volume"] = pd.to_numeric(df_chart["Volume"], errors="coerce")
+    df_chart = pd.DataFrame({
+        'Open': df['open'],
+        'High': df['high'],
+        'Low': df['low'],
+        'Close': df['close'],
+        'Volume': df['volume']
+    }, index=pd.DatetimeIndex(df.index))
 
-    # ✅ Remove rows with NaN after conversion
-    df_chart.dropna(inplace=True)
-
-    df_chart.index.name = 'Date'
-
-    # ✅ Save to buffer (for Telegram) OR path (for saving)
-    buf = io.BytesIO()
+    save_path = f"{symbol}_{signal}.png"
     mpf.plot(
         df_chart,
-        type="candle",
-        style="yahoo",
+        type='candle',
+        style='yahoo',
         volume=True,
-        savefig=dict(fname=buf, dpi=100, bbox_inches="tight")
+        savefig=dict(fname=save_path, dpi=100, bbox_inches="tight")
     )
-    buf.seek(0)
-    return buf
+    return save_path
