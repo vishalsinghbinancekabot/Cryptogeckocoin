@@ -162,6 +162,9 @@ def test_signal():
         try:
             print(f"🧪 Testing {coin}...")
             prices = fetch_price_history(coin)
+
+            print(f"🔎 Returned prices for {coin}: {prices[:5]}")
+            
             if not prices:
                 output.append(f"{coin}: ❌ No prices")
                 continue
