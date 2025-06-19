@@ -1,5 +1,3 @@
-# 📁 FILE: config.py
-
 COINS = [
     "BTCUSDT", "ETHUSDT", "SOLUSDT", "BNBUSDT", "MATICUSDT",
     "ADAUSDT", "XRPUSDT", "DOGEUSDT", "DOTUSDT", "AVAXUSDT",
