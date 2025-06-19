@@ -20,14 +20,34 @@ def fetch_candles(symbol, interval):
     }
     try:
         response = requests.get(BINANCE_URL, params=params)
+        if response.status_code != 200:
+            print(f"❌ Failed API for {symbol}: HTTP {response.status_code}")
+            return None
+        
         data = response.json()
+        if not data or not isinstance(data, list):
+            print(f"❌ Empty or invalid response for {symbol}")
+            return None
+
         df = pd.DataFrame(data, columns=[
             'timestamp', 'open', 'high', 'low', 'close', 'volume',
             '_1', '_2', '_3', '_4', '_5', '_6'
         ])
         df = df[['timestamp', 'open', 'high', 'low', 'close', 'volume']]
-        df['timestamp'] = df['timestamp'].astype(int)
+        df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
+        df.set_index('timestamp', inplace=True)
+
+        for col in ['open', 'high', 'low', 'close', 'volume']:
+            df[col] = pd.to_numeric(df[col], errors='coerce')
+
+        df.dropna(inplace=True)
+
+        if df.empty or len(df) < 10:
+            print(f"⚠️ Not enough valid data for {symbol}")
+            return None
+
         return df
+
     except Exception as e:
         print(f"❌ Error fetching data for {symbol}: {e}")
         return None
@@ -41,6 +61,10 @@ def process():
                 continue
 
             df = calculate_indicators(df)
+
+            # 🔒 Clean after indicators too (important!)
+            df.dropna(inplace=True)
+
             score = get_signal_score(df)
             signal_type = get_signal_type(score)
             trade_type = detect_trade_type(df)
@@ -53,6 +77,8 @@ def process():
                     log_signal(coin, interval, signal_type, trade_type, score)
                 else:
                     print(f"⛔ Chart not sent for {coin} due to invalid data.")
+            else:
+                print(f"ℹ️ No strong signal for {coin} ({score}/100)")
 
 def run():
     while True:
