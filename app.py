@@ -19,6 +19,8 @@ app = Flask(__name__)
 
 COINS = ["bitcoin", "ethereum", "solana", "binancecoin", "polygon"]
 
+last_fetch_time = {}
+
 # ✅ Should Fetch Logic
 def should_fetch(coin):
     now = time.time()
