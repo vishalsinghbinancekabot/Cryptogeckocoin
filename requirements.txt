@@ -1,6 +1,0 @@
-requests
-flask
-telebot
-python-dotenv
-numpy
-pandas
