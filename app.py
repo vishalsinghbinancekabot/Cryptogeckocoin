@@ -46,10 +46,13 @@ def process():
             trade_type = detect_trade_type(df)
 
             if signal_type in ["BUY", "SELL"]:
-                generate_chart(df, coin, signal_type)
-                caption = f"*{coin}* ({interval})\n📊 Signal: *{signal_type}*\n⚡ Type: {trade_type}\n🎯 Score: {score}/100"
-                send_telegram_image(caption)
-                log_signal(coin, interval, signal_type, trade_type, score)
+    chart_path = generate_chart(df, coin, signal_type)
+    if chart_path:
+        caption = f"*{coin}* ({interval})\n📊 Signal: *{signal_type}*\n⚡ Type: {trade_type}\n🎯 Score: {score}/100"
+        send_telegram_image(caption)
+        log_signal(coin, interval, signal_type, trade_type, score)
+    else:
+        print(f"⛔ Chart not sent for {coin} due to invalid data.")
 
 def run():
     while True:
