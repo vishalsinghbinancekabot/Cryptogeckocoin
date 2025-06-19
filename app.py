@@ -53,7 +53,8 @@ def fetch_price_history(coin_id):
         url = f"https://api.coingecko.com/api/v3/coins/{coin_id}/market_chart?vs_currency=usd&days=7"
         response = requests.get(url)
         data = response.json()
-
+        print(f"🟡 DEBUG: {coin_id} API Response:\n{data}")  # ✅ Ye line zaroor add karo
+        
         # 🔍 Debug prints:
         print(f"📡 API URL: {url}")
         print(f"📦 API Response keys: {list(data.keys())}")
