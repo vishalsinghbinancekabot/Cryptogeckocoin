@@ -126,7 +126,9 @@ async def run_bot():
 """
             else:
                 msg = f"""ℹ️ *HOLD Signal for {symbol}*
-💰 Current Price: ${entry_price}
+💰 Entry Price: ${entry_price}
+🎯 Suggested Watch Target: ${target_price} (+3%)
+🛡️ Suggested Stop Monitor: ${stop_loss} (-2%)
 
 📊 Indicators:
 {chr(10).join(signals)}
