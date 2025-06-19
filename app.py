@@ -21,15 +21,8 @@ COINS = ["bitcoin", "ethereum", "solana", "binancecoin", "polygon"]
 
 last_fetch_time = {}
 
-# ✅ Should Fetch Logic
-def should_fetch(coin):
-    now = time.time()
-    if coin not in last_fetch_time or now - last_fetch_time[coin] > 3600:
-        last_fetch_time[coin] = now
-        return True
-    return False
 
-# ✅ Fetch Price History
+# ✅ Fetch Current Price
 def fetch_current_price(coin_id):
     url = f"https://api.coingecko.com/api/v3/simple/price?ids={coin_id}&vs_currencies=usd"
     headers = {
@@ -42,16 +35,29 @@ def fetch_current_price(coin_id):
         print(f"📥 Response: {response.text}")
 
         data = response.json()
-        return data[coin_id]["usd"]  # ✅ Ye sahi key hai
+        return data[coin_id]["usd"]
     except Exception as e:
         print(f"❌ Error fetching price for {coin_id}: {e}")
         return None
 
+# ✅ Fetch Price History
+def fetch_price_history(coin_id):
+    try:
+        url = f"https://api.coingecko.com/api/v3/coins/{coin_id}/market_chart?vs_currency=usd&days=7"
+        response = requests.get(url)
+        data = response.json()
+
+        if "prices" not in data:
+            print(f"⚠️ 'prices' key not in API response for {coin_id}")
+            return []
+
+        prices = [price[1] for price in data["prices"]]
+        print(f"✅ Fetched {len(prices)} prices for {coin_id}")
+        return prices
     except Exception as e:
-        print(f"❌ Error fetching data for {coin_id}: {e}")
+        print(f"❌ Error fetching price history for {coin_id}: {e}")
         return []
-
-
+        
 # ✅ Indicators
 def calculate_rsi(data, period=14):
     series = pd.Series(data)
