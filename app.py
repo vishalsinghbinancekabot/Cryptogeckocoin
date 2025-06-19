@@ -100,12 +100,37 @@ async def run_bot():
             buy_count = sum("Buy" in s for s in signals)
             sell_count = sum("Sell" in s for s in signals)
 
+            entry_price = round(prices[-1], 2)
+            target_price = round(entry_price * 1.03, 2)
+            stop_loss = round(entry_price * 0.98, 2)
+
             if buy_count >= 3:
-                msg = f"✅ *BUY Signal for {symbol}*\n" + "\n".join(signals)
+                msg = f"""✅ *BUY Signal for {symbol}*
+💰 Entry Price: ${entry_price}
+🎯 Target Price: ${target_price} (+3%)
+🛡️ Stop Loss: ${stop_loss} (-2%)
+
+📊 Indicators:
+{chr(10).join(signals)}
+"""
             elif sell_count >= 3:
-                msg = f"⚠️ *SELL Signal for {symbol}*\n" + "\n".join(signals)
+                sell_target = round(entry_price * 0.97, 2)
+                sell_stop = round(entry_price * 1.02, 2)
+                msg = f"""⚠️ *SELL Signal for {symbol}*
+💰 Entry Price: ${entry_price}
+🎯 Target Price: ${sell_target} (-3%)
+🛡️ Stop Loss: ${sell_stop} (+2%)
+
+📊 Indicators:
+{chr(10).join(signals)}
+"""
             else:
-                msg = f"ℹ️ *Hold for {symbol}*\n" + "\n".join(signals)
+                msg = f"""ℹ️ *HOLD Signal for {symbol}*
+💰 Current Price: ${entry_price}
+
+📊 Indicators:
+{chr(10).join(signals)}
+"""
 
             print(msg)
             await bot.send_message(chat_id=CHAT_ID, text=msg, parse_mode="Markdown")
