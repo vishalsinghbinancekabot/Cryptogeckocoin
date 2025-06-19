@@ -157,7 +157,7 @@ def home():
     
 @app.route('/test-signal')
 def test_signal():
-    🛑 TEST SIGNAL ROUTE CALLED
+    print("🛑 TEST SIGNAL ROUTE CALLED")
     output = []
     for coin in COINS:
         try:
