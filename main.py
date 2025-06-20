@@ -180,7 +180,7 @@ def run_bot():
 
                     print(f"{coin} @ {interval} → Score: {score} → Signal: {signal}")
                     
-                    latest = df.iloc[-1]
+latest = df.iloc[-1]
                     if latest['adx'] < 15:
                         print(f"❌ Flat Market (ADX {latest['adx']}), skipping...")
                         continue
