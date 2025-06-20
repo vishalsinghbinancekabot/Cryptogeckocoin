@@ -147,13 +147,13 @@ def fetch_ohlcv(symbol, interval, limit):
         return None
 
     try:
-        df = pd.DataFrame(data, columns=["t", "o", "h", "l", "c", "v", "x", "n", "taker", "b", "q", "ignore"])
-        df = df[["o", "h", "l", "c", "v"]].astype(float)
-df.columns = ["open", "high", "low", "close", "volume"]
-        return df
-    except Exception as e:
-        print(f"❌ Data parsing error for {symbol} @ {interval}: {e}")
-        return None
+    df = pd.DataFrame(data, columns=["t", "o", "h", "l", "c", "v", "x", "n", "taker", "b", "q", "ignore"])
+    df = df[["o", "h", "l", "c", "v"]].astype(float)
+    df.columns = ["open", "high", "low", "close", "volume"]
+    return df
+except Exception as e:
+    print(f"❌ Data parsing error for {symbol} @ {interval}: {e}")
+    return None
 
 # === BOT RUNNER ===
 def run_bot():
