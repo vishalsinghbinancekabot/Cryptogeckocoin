@@ -134,10 +134,21 @@ def fetch_ohlcv(symbol, interval, limit):
     url = f"{BINANCE_URL}?symbol={symbol}&interval={interval}&limit={limit}"
     r = requests.get(url)
     data = r.json()
-    df = pd.DataFrame(data, columns=["t","o","h","l","c","v","x","n","taker","b","q","ignore"])
-    df = df[["o","h","l","c"]].astype(float)
-    df.columns = ["open", "high", "low", "close"]
-    return df
+
+    # ✅ Agar API galat data bhejti hai (jaise error msg), to handle karo
+    if not isinstance(data, list):
+        print(f"❌ Error in API response for {symbol} @ {interval}: {data}")
+        return None
+
+    try:
+        df = pd.DataFrame(data, columns=["t", "o", "h", "l", "c", "v", "x", "n", "taker", "b", "q", "ignore"])
+        df = df[["o", "h", "l", "c"]].astype(float)
+        df.columns = ["open", "high", "low", "close"]
+        return df
+    except Exception as e:
+        print(f"❌ Data parsing error for {symbol} @ {interval}: {e}")
+        return None
+
 
 # === BOT RUNNER ===
 def run_bot():
