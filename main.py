@@ -143,12 +143,12 @@ def run_bot():
                     signal = get_signal_type(score)
                     trade_type = detect_trade_type(interval)
                     price = df['close'].iloc[-1]
-                    message = format_signal_message(coin, interval, signal, trade_type, score, price)
-                    send_telegram_message(message)
-                except Exception as e:
-                    print(f"{coin}@{interval} Error: {e}")
-        time.sleep(CHECK_INTERVAL_SECONDS)
-
+                    if score >= 70:
+    message = format_signal_message(coin, interval, signal, trade_type, score, price)
+    send_telegram_message(message)
+else:
+    print(f"⚠️ Low score ({score}/100) for {coin} ({interval}) – Skipped")
+    
 # === START ===
 if __name__ == "__main__":
     run_bot()
