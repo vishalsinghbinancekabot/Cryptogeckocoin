@@ -179,8 +179,8 @@ def run_bot():
                     price = df['close'].iloc[-1]
 
                     print(f"{coin} @ {interval} → Score: {score} → Signal: {signal}")
-
-      latest = df.iloc[-1]
+                    
+ latest = df.iloc[-1]
                     if latest['adx'] < 15:
                         print(f"❌ Flat Market (ADX {latest['adx']}), skipping...")
                         continue
@@ -200,11 +200,6 @@ def run_bot():
                         time.sleep(1.2)
                     else:
                         print(f"❌ Skipped {coin} @ {interval} due to low confidence ({score})")
-                except Exception as e:
-                    print(f"Error checking {coin} @ {interval}: {e}")
-
-        time.sleep(CHECK_INTERVAL_SECONDS)
-
 # === START ===
 if __name__ == "__main__":
     run_bot()
