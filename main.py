@@ -1,4 +1,8 @@
 import os
+import time
+import requests
+import pandas as pd
+import ta
 
 # === CONFIG ===
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
@@ -6,7 +10,7 @@ TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
 if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID:
     raise ValueError("TELEGRAM_TOKEN or TELEGRAM_CHAT_ID is missing! Please set them in environment.")
-    
+
 COINS = [
     "BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "XRPUSDT", "ADAUSDT", "DOGEUSDT", "DOTUSDT",
     "AVAXUSDT", "TRXUSDT", "LINKUSDT", "MATICUSDT", "LTCUSDT", "BCHUSDT", "UNIUSDT", "ATOMUSDT",
@@ -16,20 +20,13 @@ COINS = [
     "OPUSDT", "ARBUSDT", "INJUSDT", "DYDXUSDT", "GMXUSDT", "RNDRUSDT", "LDOUSDT", "TWTUSDT"
 ]
 INTERVALS = ["5m", "15m", "1h", "1d"]
-
 CANDLE_LIMIT = 100
 CHECK_INTERVAL_SECONDS = 1800  # every 30 mins
 BINANCE_URL = "https://api.binance.com/api/v3/klines"
 
-# === IMPORTS ===
-import time
-import requests
-import pandas as pd
-import ta
-
 # === TELEGRAM BOT ===
 def escape_markdown(text):
-    escape_chars = r'\_*[]()~`>#+-=|{}.!/'
+    escape_chars = r'_*~`>#+-=|{}.!/'
     return ''.join(['\\' + c if c in escape_chars else c for c in text])
 
 def send_telegram_message(text):
@@ -67,26 +64,36 @@ def calculate_indicators(df):
 # === STRATEGY ===
 def get_signal_score(df):
     score = 0
+    reasons = []
     latest = df.iloc[-1]
     if latest['rsi'] < 30:
         score += 10
+        reasons.append("RSI below 30 (Oversold)")
     elif latest['rsi'] > 70:
         score -= 10
+        reasons.append("RSI above 70 (Overbought)")
     if latest['macd'] > 0:
         score += 10
+        reasons.append("MACD positive crossover")
     else:
         score -= 10
+        reasons.append("MACD negative")
     if latest['ema_fast'] > latest['ema_slow']:
         score += 10
+        reasons.append("EMA Fast > EMA Slow")
     else:
         score -= 10
+        reasons.append("EMA Fast < EMA Slow")
     if latest['adx'] > 25:
         score += 10
+        reasons.append("Strong trend (ADX > 25)")
     if latest['close'] < latest['bb_lower']:
         score += 5
+        reasons.append("Close below Bollinger Band")
     elif latest['close'] > latest['bb_upper']:
         score -= 5
-    return max(0, min(100, score))
+        reasons.append("Close above Bollinger Band")
+    return max(0, min(100, score)), reasons
 
 def get_signal_type(score):
     if score >= 70:
@@ -135,7 +142,6 @@ def fetch_ohlcv(symbol, interval, limit):
     r = requests.get(url)
     data = r.json()
 
-    # ✅ Agar API galat data bhejti hai (jaise error msg), to handle karo
     if not isinstance(data, list):
         print(f"❌ Error in API response for {symbol} @ {interval}: {data}")
         return None
@@ -149,7 +155,6 @@ def fetch_ohlcv(symbol, interval, limit):
         print(f"❌ Data parsing error for {symbol} @ {interval}: {e}")
         return None
 
-
 # === BOT RUNNER ===
 def run_bot():
     while True:
@@ -158,21 +163,25 @@ def run_bot():
                 try:
                     print(f"Checking {coin} @ {interval}...")
                     df = fetch_ohlcv(coin, interval, CANDLE_LIMIT)
+
+                    # ✅ Error fix: empty ya none response skip karo
+                    if df is None or df.empty:
+                        print(f"⚠️ Skipping {coin} @ {interval} due to empty/error data")
+                        continue
+
                     df = calculate_indicators(df)
-                    score, reasons = get_signal_score(df)
+                    score, reasons = get_signal_score(df)  # ✅ yahan error fix hua
                     signal = get_signal_type(score)
                     trade_type = detect_trade_type(interval)
                     price = df['close'].iloc[-1]
 
                     print(f"{coin} @ {interval} → Score: {score} → Signal: {signal}")
 
-                    # === Fake Signal Filter ===
                     latest = df.iloc[-1]
                     if latest['adx'] < 15:
                         print(f"❌ Flat Market (ADX {latest['adx']}), skipping...")
                         continue
 
-                    # === Send Signal If Confident ===
                     if score >= 70 or score <= 30:
                         message = format_signal_message(
                             coin,
@@ -187,7 +196,9 @@ def run_bot():
 
                 except Exception as e:
                     print(f"Error checking {coin} @ {interval}: {e}")
-                    
+
+        time.sleep(CHECK_INTERVAL_SECONDS)
+
 # === START ===
 if __name__ == "__main__":
     run_bot()
