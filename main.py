@@ -142,18 +142,24 @@ def run_bot():
                     score = get_signal_score(df)
                     signal = get_signal_type(score)
                     trade_type = detect_trade_type(interval)
-                    price = df['close'].iloc[-1]
-                    if score >= 70:
+                    price = df['close'].iloc[-1]                    
+if score >= 70:
+    signal_type = signal
+    entry_price = price
+    stop_loss = round(price * 0.98, 2)
+    target_price = round(price * 1.03, 2)
+
     message = format_signal_message(
-    coin,
-    interval,
-    signal_type,
-    score,
-    trade_type,
-    entry_price,
-    stop_loss,
-    target_price
+        coin,
+        interval,
+        signal_type,
+        score,
+        trade_type,
+        entry_price,
+        stop_loss,
+        target_price
     )
+    send_telegram_message(message)
     
 # === START ===
 if __name__ == "__main__":
