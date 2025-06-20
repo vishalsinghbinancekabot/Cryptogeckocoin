@@ -184,18 +184,22 @@ def run_bot():
                     if latest['adx'] < 15:
                         print(f"❌ Flat Market (ADX {latest['adx']}), skipping...")
                         continue
+        
+            message = format_signal_message(
+    coin,
+    interval,
+    signal,
+    score,
+    trade_type,
+    price,
+    reasons
+)
 
-                    if score >= 70 or score <= 30:
-                        message = format_signal_message(
-                            coin,
-                            interval,
-                            signal,
-                            score,
-                            trade_type,
-                            price,
-                            reasons
-                        )
-                        send_telegram_message(message)
+if score >= 50:
+    send_telegram_message(message)
+    time.sleep(1.2)
+else:
+    print(f"❌ Skipped {coin} @ {interval} due to low confidence ({score})")
 
                 except Exception as e:
                     print(f"Error checking {coin} @ {interval}: {e}")
