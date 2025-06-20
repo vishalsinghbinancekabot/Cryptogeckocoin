@@ -68,7 +68,7 @@ def process():
                 trade_type = detect_trade_type(df)
 
                 if signal_type in ["BUY", "SELL"]:
-                    caption = f"*{coin}* ({interval})\n📊 Signal: *{signal_type}*\n⚡ Type: {trade_type}*\n🎯 Score: {score}/100"
+                    caption = f"*{coin}* ({interval})\n📊 Signal: *{signal_type}*\n⚡ Type: {trade_type}\n🎯 Score: {score}/100"
                     send_telegram_message(caption)
                     log_signal(coin, interval, signal_type, trade_type, score)
                 else:
