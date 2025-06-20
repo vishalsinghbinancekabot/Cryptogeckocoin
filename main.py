@@ -1,10 +1,12 @@
 import os
 
+# === CONFIG ===
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
-TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")# === CONFIG ===
-TELEGRAM_TOKEN = "your_telegram_bot_token"
-TELEGRAM_CHAT_ID = "your_telegram_chat_id"
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
+if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID:
+    raise ValueError("TELEGRAM_TOKEN or TELEGRAM_CHAT_ID is missing! Please set them in environment.")
+    
 COINS = [
     "BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "XRPUSDT", "ADAUSDT", "DOGEUSDT", "DOTUSDT",
     "AVAXUSDT", "TRXUSDT", "LINKUSDT", "MATICUSDT", "LTCUSDT", "BCHUSDT", "UNIUSDT", "ATOMUSDT",
