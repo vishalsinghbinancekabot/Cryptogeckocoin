@@ -2,9 +2,8 @@ import requests
 import re
 from config import TELEGRAM_TOKEN, TELEGRAM_CHAT_ID
 
-# ✅ MarkdownV2 escaping function
-def escape_markdown(text):
-    escape_chars = r'\_*[]()~`>#+-=|{}.!'
+#def escape_markdown(text):
+    escape_chars = r'\_*[]()~`>#+-=|{}.!%:'
     return ''.join(['\\' + c if c in escape_chars else c for c in text])
 
 # ✅ Message sender
