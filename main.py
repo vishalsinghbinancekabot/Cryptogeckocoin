@@ -185,7 +185,7 @@ def run_bot():
                         print(f"❌ Flat Market (ADX {latest['adx']}), skipping...")
                         continue
         
-            message = format_signal_message(
+        message = format_signal_message(
     coin,
     interval,
     signal,
@@ -200,6 +200,7 @@ if score >= 50:
     time.sleep(1.2)
 else:
     print(f"❌ Skipped {coin} @ {interval} due to low confidence ({score})")
+
 
                 except Exception as e:
                     print(f"Error checking {coin} @ {interval}: {e}")
