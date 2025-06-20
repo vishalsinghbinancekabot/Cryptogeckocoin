@@ -34,6 +34,7 @@ def send_telegram_image(caption, image_path):
             return False
 
         escaped_caption = escape_markdown(caption)
+        print(f"📤 Escaped Caption: {escaped_caption}")
         print(f"📤 Sending image: {image_path}")
         with open(image_path, 'rb') as photo:
             files = {'photo': photo}
