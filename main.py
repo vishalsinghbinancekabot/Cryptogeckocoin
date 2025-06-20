@@ -145,9 +145,16 @@ def run_bot():
                     price = df['close'].iloc[-1]
                     if score >= 70:
     message = format_signal_message(coin, interval, signal, trade_type, score, price)
-    send_telegram_message(message)
-else:
-    print(f"⚠️ Low score ({score}/100) for {coin} ({interval}) – Skipped")
+    message = format_signal_message(
+    coin,
+    interval,
+    signal_type,
+    score,
+    trade_type,
+    entry_price,
+    stop_loss,
+    target_price
+    )
     
 # === START ===
 if __name__ == "__main__":
