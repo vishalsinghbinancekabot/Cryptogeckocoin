@@ -1,13 +1,19 @@
 import requests
 from config import TELEGRAM_TOKEN, TELEGRAM_CHAT_ID
 
-# ✅ Plain message sender (no markdown)
+# ✅ MarkdownV2 escaping function
+def escape_markdown(text):
+    escape_chars = r'\_*[]()~`>#+-=|{}.!'
+    return ''.join(['\\' + c if c in escape_chars else c for c in text])
+
+# ✅ Message sender with error-proof markdown
 def send_telegram_message(text):
+    escaped_text = escape_markdown(text)
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
     payload = {
         "chat_id": TELEGRAM_CHAT_ID,
-        "text": text  # No markdown escape needed
-        # "parse_mode": None ← default is None
+        "text": escaped_text,
+        "parse_mode": "MarkdownV2"
     }
     try:
         response = requests.post(url, json=payload)
