@@ -41,7 +41,7 @@ def get_signal_score(df):
         score += 5
         reasons.append("🚀 ADX > 40 (+5)")
 
-    # Bollinger
+    # Bollinger Bands
     if latest['close'] < latest['bb_lower']:
         score += 10
         reasons.append("🟢 BB Lower Bounce (+10)")
@@ -49,20 +49,21 @@ def get_signal_score(df):
         score -= 10
         reasons.append("🔴 BB Upper Breakout (-10)")
 
-    # Volume Spike
-    if latest['vol_spike']:
+    # Volume Spike (Safe)
+    if 'vol_spike' in latest and latest['vol_spike']:
         score += 10
         reasons.append("💥 Volume Spike (+10)")
 
-    # Supertrend
-    if latest['supertrend'] == "buy":
-        score += 10
-        reasons.append("🟢 SuperTrend BUY (+10)")
-    elif latest['supertrend'] == "sell":
-        score -= 10
-        reasons.append("🔴 SuperTrend SELL (-10)")
+    # SuperTrend (Safe)
+    if 'supertrend' in latest:
+        if latest['supertrend'] == "buy":
+            score += 10
+            reasons.append("🟢 SuperTrend BUY (+10)")
+        elif latest['supertrend'] == "sell":
+            score -= 10
+            reasons.append("🔴 SuperTrend SELL (-10)")
 
-    # ATR Volatility Compression
+    # ATR Compression
     if latest['atr'] < df['atr'].mean() * 0.9:
         score += 5
         reasons.append("🌀 Low Volatility Setup (+5)")
