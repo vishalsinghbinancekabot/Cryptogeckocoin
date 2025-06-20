@@ -180,27 +180,26 @@ def run_bot():
 
                     print(f"{coin} @ {interval} → Score: {score} → Signal: {signal}")
 
-                    latest = df.iloc[-1]
-if latest['adx'] < 15:
-    print(f"❌ Flat Market (ADX {latest['adx']}), skipping...")
-    continue
+      latest = df.iloc[-1]
+                    if latest['adx'] < 15:
+                        print(f"❌ Flat Market (ADX {latest['adx']}), skipping...")
+                        continue
 
-message = format_signal_message(
-    coin,
-    interval,
-    signal,
-    score,
-    trade_type,
-    price,
-    reasons
-)
+                    message = format_signal_message(
+                        coin,
+                        interval,
+                        signal,
+                        score,
+                        trade_type,
+                        price,
+                        reasons
+                    )
 
-if score >= 50:
-    send_telegram_message(message)
-    time.sleep(1.2)
-else:
-    print(f"❌ Skipped {coin} @ {interval} due to low confidence ({score})")
-
+                    if score >= 50:
+                        send_telegram_message(message)
+                        time.sleep(1.2)
+                    else:
+                        print(f"❌ Skipped {coin} @ {interval} due to low confidence ({score})")              
 
                 except Exception as e:
                     print(f"Error checking {coin} @ {interval}: {e}")
