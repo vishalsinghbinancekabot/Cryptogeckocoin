@@ -148,32 +148,35 @@ def run_bot():
                     print(f"Checking {coin} @ {interval}...")
                     df = fetch_ohlcv(coin, interval, CANDLE_LIMIT)
                     df = calculate_indicators(df)
-                    score = get_signal_score(df)
+                    score, reasons = get_signal_score(df)
                     signal = get_signal_type(score)
                     trade_type = detect_trade_type(interval)
                     price = df['close'].iloc[-1]
 
-                    if score >= 70:
-                        signal_type = signal
-                        entry_price = price
-                        stop_loss = round(price * 0.98, 2)
-                        target_price = round(price * 1.03, 2)
+                    print(f"{coin} @ {interval} → Score: {score} → Signal: {signal}")
 
+                    # === Fake Signal Filter ===
+                    latest = df.iloc[-1]
+                    if latest['adx'] < 15:
+                        print(f"❌ Flat Market (ADX {latest['adx']}), skipping...")
+                        continue
+
+                    # === Send Signal If Confident ===
+                    if score >= 70 or score <= 30:
                         message = format_signal_message(
                             coin,
                             interval,
-                            signal_type,
+                            signal,
                             score,
                             trade_type,
-                            entry_price,
-                            stop_loss,
-                            target_price
+                            price,
+                            reasons
                         )
                         send_telegram_message(message)
-                        
+
                 except Exception as e:
                     print(f"Error checking {coin} @ {interval}: {e}")
-    
+                    
 # === START ===
 if __name__ == "__main__":
     run_bot()
