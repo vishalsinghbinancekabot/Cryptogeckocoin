@@ -146,7 +146,7 @@ def fetch_ohlcv(symbol, interval, limit):
         print(f"❌ Error in API response for {symbol} @ {interval}: {data}")
         return None
 
-    try:
+try:
     df = pd.DataFrame(data, columns=["t", "o", "h", "l", "c", "v", "x", "n", "taker", "b", "q", "ignore"])
     df = df[["o", "h", "l", "c", "v"]].astype(float)
     df.columns = ["open", "high", "low", "close", "volume"]
