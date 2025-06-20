@@ -6,8 +6,7 @@ from config import COINS, INTERVALS, CANDLE_LIMIT, CHECK_INTERVAL_SECONDS
 from indicators import calculate_indicators
 from strategy import get_signal_score, get_signal_type
 from trade_type import detect_trade_type
-from chart_image import generate_chart
-from bot import send_telegram_message, send_telegram_image
+from bot import send_telegram_message
 from logger import log_signal
 
 BINANCE_URL = "https://api.binance.com/api/v3/klines"
@@ -69,18 +68,13 @@ def process():
                 trade_type = detect_trade_type(df)
 
                 if signal_type in ["BUY", "SELL"]:
-                    chart_path = generate_chart(df, coin, signal_type)
-                    if chart_path:
-                        caption = f"*{coin}* ({interval})\n📊 Signal: *{signal_type}*\n⚡ Type: {trade_type}*\n🎯 Score: {score}/100"
-                        send_telegram_image(caption, chart_path)
-                        log_signal(coin, interval, signal_type, trade_type, score)
-                    else:
-                        print(f"⛔ Chart not sent for {coin} due to invalid data.")
+                    caption = f"*{coin}* ({interval})\n📊 Signal: *{signal_type}*\n⚡ Type: {trade_type}*\n🎯 Score: {score}/100"
+                    send_telegram_message(caption)
+                    log_signal(coin, interval, signal_type, trade_type, score)
                 else:
                     print(f"ℹ️ No strong signal for {coin} ({score}/100)")
             except Exception as e:
                 print(f"❌ Error processing {coin}@{interval}: {e}")
-
 
 def run():
     while True:
