@@ -144,7 +144,6 @@ def run_bot():
                     trade_type = detect_trade_type(interval)
                     price = df['close'].iloc[-1]
                     if score >= 70:
-    message = format_signal_message(coin, interval, signal, trade_type, score, price)
     message = format_signal_message(
     coin,
     interval,
