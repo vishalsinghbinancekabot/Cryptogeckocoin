@@ -1,4 +1,7 @@
-# === CONFIG ===
+import os
+
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")# === CONFIG ===
 TELEGRAM_TOKEN = "your_telegram_bot_token"
 TELEGRAM_CHAT_ID = "your_telegram_chat_id"
 
