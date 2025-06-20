@@ -199,8 +199,7 @@ def run_bot():
                         send_telegram_message(message)
                         time.sleep(1.2)
                     else:
-                        print(f"❌ Skipped {coin} @ {interval} due to low confidence ({score})")              
-
+                        print(f"❌ Skipped {coin} @ {interval} due to low confidence ({score})")
                 except Exception as e:
                     print(f"Error checking {coin} @ {interval}: {e}")
 
