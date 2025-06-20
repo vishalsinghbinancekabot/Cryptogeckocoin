@@ -143,7 +143,7 @@ def run_bot():
                     signal = get_signal_type(score)
                     trade_type = detect_trade_type(interval)
                     price = df['close'].iloc[-1]                    
-if score >= 70:
+  if score >= 70:
     signal_type = signal
     entry_price = price
     stop_loss = round(price * 0.98, 2)
