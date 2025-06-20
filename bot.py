@@ -4,7 +4,7 @@ TELEGRAM_TOKEN = "7858591209:AAHuFzy2IDyuH4WRV5FiWQMNb3d--5-vaVs"  # ← replace
 TELEGRAM_CHAT_ID = "<your_chat_id_here>"  # ← replace with real value
 
 def escape_markdown(text):
-    escape_chars = r'\_*[]()~`>#+-=|{}.!/'
+    escape_chars = r'_*()~`>#+-=|{}.!'
     return ''.join(['\\' + c if c in escape_chars else c for c in text])
 
 def send_telegram_message(text):
