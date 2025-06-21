@@ -231,16 +231,15 @@ def detect_trade_type(interval):
     return "Swing"
 
 def format_signal_message(coin, interval, signal, score, trade_type, price, reasons, hit_chance, atr):
-    r_percent = 2
-    t_percent = 3
-    sl = target = None
-
-    if signal == "BUY":
-        sl = round(price * (1 - r_percent / 100), 4)
-        target = round(price * (1 + t_percent / 100), 4)
-    elif signal == "SELL":
-        sl = round(price * (1 + r_percent / 100), 4)
-        target = round(price * (1 - t_percent / 100), 4)
+    r_mult = 1.5
+t_mult = 2.5
+sl = target = None
+if signal == "BUY":
+    sl = round(price - (r_mult * atr), 4)
+    target = round(price + (t_mult * atr), 4)
+elif signal == "SELL":
+    sl = round(price + (r_mult * atr), 4)
+    target = round(price - (t_mult * atr), 4)
 
     confidence_bar = "█" * (score // 10) + "░" * (10 - score // 10)
     reason_text = "\n".join(reasons)
