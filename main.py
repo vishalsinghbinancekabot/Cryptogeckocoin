@@ -280,11 +280,13 @@ def fetch_ohlcv(symbol, interval, limit):
         return None
 
 # === BOT RUNNER ===
-# === BOT RUNNER ===
 def run_bot():
     while True:
-        for coin in COINS:
-            for interval in INTERVALS:
+        for interval in INTERVALS:
+            message_block = f"🕒 *Timeframe: {interval.upper()} Signals*\n\n"
+            count = 0
+
+            for coin in COINS:
                 try:
                     print(f"Checking {coin} @ {interval}...")
                     df = fetch_ohlcv(coin, interval, CANDLE_LIMIT)
@@ -310,8 +312,8 @@ def run_bot():
                         message = format_signal_message(
                             coin, interval, signal, score, trade_type, price, reasons, hit_chance, atr
                         )
-                        send_telegram_message(message)
-                        time.sleep(1.2)
+                        message_block += message + "\n\n"
+                        count += 1
 
                     elif signal == "HOLD" and score >= 50:
                         sl = round(price - (1.5 * atr), 4)
@@ -334,15 +336,24 @@ def run_bot():
 
 📎 *Note: This is a HOLD signal (Not yet confirmed). Wait for stronger confirmation before taking a trade.*
 """
-                        send_telegram_message(message)
-                        time.sleep(1.2)
+                        message_block += message + "\n\n"
+                        count += 1
 
                     else:
                         print(f"❌ Skipped {coin} @ {interval} – Signal: {signal}, Score: {score}")
 
                 except Exception as e:
                     print(f"⚠️ Error processing {coin} @ {interval}: {e}")
-                    
+
+            # ✅ Send 1 grouped message for this interval
+            if count > 0:
+                send_telegram_message(message_block)
+                time.sleep(3)  # Optional pause between timeframes
+            else:
+                print(f"⚠️ No valid signals for {interval}")
+
+        time.sleep(CHECK_INTERVAL_SECONDS)
+        
 # === START ===
 if __name__ == "__main__":
     run_bot()
