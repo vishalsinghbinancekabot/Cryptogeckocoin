@@ -246,7 +246,7 @@ elif signal == "SELL":
 
     return f"""🚨 {signal} SIGNAL – {coin} ({interval})
 💰 Price: {price}
-🎯 Target: {target}
+🎯 Target: {target} (🎯 Likely: {hit_chance}%)
 🛡️ Stop Loss: {sl}
 📌 Trade Type: {trade_type}
 
