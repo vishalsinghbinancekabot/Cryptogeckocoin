@@ -306,7 +306,7 @@ def run_bot():
                         continue
 
                     # 👇 Correctly indented if-elif-else block
-                    if signal in ["BUY", "SELL"] and score >= 50:
+                     if signal in ["BUY", "SELL"] and score >= 50:
     message = format_signal_message(
         coin, interval, signal, score, trade_type, price, reasons, hit_chance, atr
     )
@@ -339,9 +339,6 @@ elif signal == "HOLD" and score >= 50:
 
 else:
     print(f"❌ Skipped {coin} @ {interval} – Signal: {signal}, Score: {score}")
-
-                    else:
-                        print(f"❌ Skipped {coin} @ {interval} – Signal: {signal}, Score: {score}") 
 
                 except Exception as e:
                     print(f"⚠️ Error processing {coin} @ {interval}: {e}")
