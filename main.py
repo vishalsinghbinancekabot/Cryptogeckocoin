@@ -280,6 +280,7 @@ def fetch_ohlcv(symbol, interval, limit):
         return None
 
 # === BOT RUNNER ===
+# === BOT RUNNER ===
 def run_bot():
     while True:
         for coin in COINS:
@@ -305,21 +306,20 @@ def run_bot():
                         print(f"❌ Flat Market (ADX {latest['adx']}), skipping...")
                         continue
 
-                    # 👇 Correctly indented if-elif-else block
-                     if signal in ["BUY", "SELL"] and score >= 50:
-    message = format_signal_message(
-        coin, interval, signal, score, trade_type, price, reasons, hit_chance, atr
-    )
-    send_telegram_message(message)
-    time.sleep(1.2)
+                    if signal in ["BUY", "SELL"] and score >= 50:
+                        message = format_signal_message(
+                            coin, interval, signal, score, trade_type, price, reasons, hit_chance, atr
+                        )
+                        send_telegram_message(message)
+                        time.sleep(1.2)
 
-elif signal == "HOLD" and score >= 50:
-    sl = round(price - (1.5 * atr), 4)
-    target = round(price + (2.5 * atr), 4)
-    confidence_bar = "█" * (score // 10) + "░" * (10 - score // 10)
-    reason_text = "\n".join(reasons)
+                    elif signal == "HOLD" and score >= 50:
+                        sl = round(price - (1.5 * atr), 4)
+                        target = round(price + (2.5 * atr), 4)
+                        confidence_bar = "█" * (score // 10) + "░" * (10 - score // 10)
+                        reason_text = "\n".join(reasons)
 
-    message = f"""ℹ️ HOLD Signal – {coin} ({interval})
+                        message = f"""ℹ️ HOLD Signal – {coin} ({interval})
 💰 Price: {price}
 🎯 Target: {target}
 🛡️ Stop Loss: {sl}
@@ -334,11 +334,11 @@ elif signal == "HOLD" and score >= 50:
 
 📎 *Note: This is a HOLD signal (Not yet confirmed). Wait for stronger confirmation before taking a trade.*
 """
-    send_telegram_message(message)
-    time.sleep(1.2)
+                        send_telegram_message(message)
+                        time.sleep(1.2)
 
-else:
-    print(f"❌ Skipped {coin} @ {interval} – Signal: {signal}, Score: {score}")
+                    else:
+                        print(f"❌ Skipped {coin} @ {interval} – Signal: {signal}, Score: {score}")
 
                 except Exception as e:
                     print(f"⚠️ Error processing {coin} @ {interval}: {e}")
