@@ -305,7 +305,17 @@ def run_bot():
                         print(f"❌ Flat Market (ADX {latest['adx']}), skipping...")
                         continue
 
-                    
+                    message = format_signal_message(
+    coin,
+    interval,
+    signal,
+    score,
+    trade_type,
+    price,
+    reasons,
+    hit_chance,
+    atr
+                    )
 
                     if score >= 50:
                         send_telegram_message(message)
