@@ -86,10 +86,37 @@ def calculate_indicators(df):
     df['ema_fast'] = ta.trend.EMAIndicator(df['close'], window=12).ema_indicator()
     df['ema_slow'] = ta.trend.EMAIndicator(df['close'], window=26).ema_indicator()
     df['adx'] = ta.trend.ADXIndicator(df['high'], df['low'], df['close']).adx()
+
     bb = ta.volatility.BollingerBands(df['close'])
     df['bb_upper'] = bb.bollinger_hband()
     df['bb_lower'] = bb.bollinger_lband()
+
     df['atr'] = ta.volatility.AverageTrueRange(df['high'], df['low'], df['close']).average_true_range()
+
+    # === ✅ SuperTrend Calculation ===
+    factor = 3
+    atr = df['atr']
+    hl2 = (df['high'] + df['low']) / 2
+    upperband = hl2 + (factor * atr)
+    lowerband = hl2 - (factor * atr)
+
+    supertrend = []
+    in_uptrend = True
+
+    for i in range(len(df)):
+        if i == 0:
+            supertrend.append(in_uptrend)
+            continue
+
+        if df['close'].iloc[i] > upperband.iloc[i - 1]:
+            in_uptrend = True
+        elif df['close'].iloc[i] < lowerband.iloc[i - 1]:
+            in_uptrend = False
+
+        supertrend.append(in_uptrend)
+
+    df['supertrend'] = ['buy' if val else 'sell' for val in supertrend]
+
     return df.dropna()
 
 # === STRATEGY ===
