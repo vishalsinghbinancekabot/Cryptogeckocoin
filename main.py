@@ -312,8 +312,8 @@ def run_bot():
                         )
                         send_telegram_message(message)
                         time.sleep(1.2)
-
-                    elif signal == "HOLD" and score >= 50:
+                        
+elif signal == "HOLD" and score >= 50:
     sl = round(price - (1.5 * atr), 4)
     target = round(price + (2.5 * atr), 4)
     confidence_bar = "█" * (score // 10) + "░" * (10 - score // 10)
@@ -336,6 +336,7 @@ def run_bot():
 """
     send_telegram_message(message)
     time.sleep(1.2)
+                    
 
                     else:
                         print(f"❌ Skipped {coin} @ {interval} – Signal: {signal}, Score: {score}") 
