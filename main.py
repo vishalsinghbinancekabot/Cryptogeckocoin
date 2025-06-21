@@ -230,8 +230,8 @@ def detect_trade_type(interval):
         return "Intraday"
     return "Swing"
 
-def format_signal_message(coin, interval, signal, score, trade_type, price, reasons, hit_chance, atr):
-    r_mult = 1.5
+def format_signal_message(coin, interval, signal, score, trade_type, price, reasons, hit_chance, atr): 
+r_mult = 1.5
 t_mult = 2.5
 sl = target = None
 if signal == "BUY":
