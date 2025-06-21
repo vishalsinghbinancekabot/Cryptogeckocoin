@@ -293,7 +293,7 @@ def run_bot():
                         continue
 
                     df = calculate_indicators(df)
-                    score, reasons = get_signal_score(df)
+                    score, reasons, hit_chance, atr = get_signal_score(df)
                     signal = get_signal_type(score)
                     trade_type = detect_trade_type(interval)
                     price = df['close'].iloc[-1]
