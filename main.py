@@ -120,6 +120,19 @@ def calculate_indicators(df):
     return df.dropna()
 
 # === STRATEGY ===
+
+def estimate_target_success(confidence, adx, atr, volume_spike):
+    base = confidence / 100
+    if adx > 40:
+        base += 0.10
+    elif adx > 25:
+        base += 0.05
+    if atr > 0:
+        base += 0.05
+    if volume_spike:
+        base += 0.05
+    return max(min(round(base * 100), 95), 10)
+    
 from ta.trend import EMAIndicator, MACD, ADXIndicator
 from ta.momentum import RSIIndicator
 from ta.volatility import BollingerBands, AverageTrueRange
