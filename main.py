@@ -93,39 +93,85 @@ def calculate_indicators(df):
     return df.dropna()
 
 # === STRATEGY ===
+from ta.trend import EMAIndicator, MACD, ADXIndicator
+from ta.momentum import RSIIndicator
+from ta.volatility import BollingerBands, AverageTrueRange
+
 def get_signal_score(df):
     score = 0
     reasons = []
     latest = df.iloc[-1]
-    if latest['rsi'] < 30:
-        score += 10
-        reasons.append("RSI below 30 (Oversold)")
+
+    # RSI Analysis
+    if latest['rsi'] < 20:
+        score += 20
+        reasons.append("🔥 RSI < 20 (Very Oversold)")
+    elif latest['rsi'] < 30:
+        score += 15
+        reasons.append("✅ RSI < 30 (Oversold)")
+    elif latest['rsi'] > 80:
+        score -= 20
+        reasons.append("❌ RSI > 80 (Very Overbought)")
     elif latest['rsi'] > 70:
         score -= 10
-        reasons.append("RSI above 70 (Overbought)")
+        reasons.append("⚠️ RSI > 70 (Overbought)")
+
+    # MACD
     if latest['macd'] > 0:
-        score += 10
-        reasons.append("MACD positive crossover")
+        score += 15
+        reasons.append("✅ MACD bullish crossover")
     else:
         score -= 10
-        reasons.append("MACD negative")
+        reasons.append("❌ MACD bearish")
+
+    # EMA Crossover
     if latest['ema_fast'] > latest['ema_slow']:
         score += 10
-        reasons.append("EMA Fast > EMA Slow")
+        reasons.append("✅ EMA Fast > Slow (Bullish)")
     else:
         score -= 10
-        reasons.append("EMA Fast < EMA Slow")
-    if latest['adx'] > 25:
-        score += 10
-        reasons.append("Strong trend (ADX > 25)")
-    if latest['close'] < latest['bb_lower']:
-        score += 5
-        reasons.append("Close below Bollinger Band")
-    elif latest['close'] > latest['bb_upper']:
-        score -= 5
-        reasons.append("Close above Bollinger Band")
-    return max(0, min(100, score)), reasons
+        reasons.append("❌ EMA Fast < Slow (Bearish)")
 
+    # ADX (trend strength)
+    if latest['adx'] > 40:
+        score += 15
+        reasons.append("🔥 Strong trend (ADX > 40)")
+    elif latest['adx'] > 25:
+        score += 10
+        reasons.append("✅ Moderate trend (ADX > 25)")
+    elif latest['adx'] < 15:
+        score -= 10
+        reasons.append("❌ No trend (ADX < 15)")
+
+    # Bollinger Band breakout
+    if latest['close'] < latest['bb_lower']:
+        score += 10
+        reasons.append("✅ Close below lower BB (Buy Zone)")
+    elif latest['close'] > latest['bb_upper']:
+        score -= 10
+        reasons.append("❌ Close above upper BB (Sell Zone)")
+
+    # ATR breakout (volatility expansion)
+    if df['close'].iloc[-1] - df['close'].iloc[-2] > latest['atr']:
+        score += 5
+        reasons.append("✅ Price > ATR range (Momentum breakout)")
+
+    # Volume Spike
+    avg_vol = df['volume'].iloc[-20:].mean()
+    if latest['volume'] > 1.5 * avg_vol:
+        score += 10
+        reasons.append("✅ Volume Spike Detected")
+
+    # SuperTrend (must be added in indicators)
+    if 'supertrend' in latest and latest['supertrend'] == 'buy':
+        score += 15
+        reasons.append("✅ SuperTrend: Buy Signal")
+    elif 'supertrend' in latest and latest['supertrend'] == 'sell':
+        score -= 15
+        reasons.append("❌ SuperTrend: Sell Signal")
+
+    return max(0, min(100, score)), reasons
+    
 def get_signal_type(score):
     if score >= 70:
         return "BUY"
