@@ -210,7 +210,11 @@ def get_signal_score(df):
         score -= 15
         reasons.append("❌ SuperTrend: Sell Signal")
 
-    return max(0, min(100, score)), reasons
+    avg_vol = df['volume'].iloc[-20:].mean()
+    volume_spike = latest['volume'] > 1.5 * avg_vol
+
+    hit_chance = estimate_target_success(score, latest['adx'], latest['atr'], volume_spike)
+    return max(0, min(100, score)), reasons, hit_chance, latest['atr']
     
 def get_signal_type(score):
     if score >= 70:
