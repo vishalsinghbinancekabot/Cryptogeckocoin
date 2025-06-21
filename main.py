@@ -2,7 +2,7 @@ import os
 import time
 import requests
 import pandas as pd
-import ta
+import ta 
 
 # === CONFIG ===
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
