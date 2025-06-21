@@ -230,7 +230,7 @@ def detect_trade_type(interval):
         return "Intraday"
     return "Swing"
 
-def format_signal_message(coin, interval, signal, score, trade_type, price, reasons):
+def format_signal_message(coin, interval, signal, score, trade_type, price, reasons, hit_chance, atr):
     r_percent = 2
     t_percent = 3
     sl = target = None
