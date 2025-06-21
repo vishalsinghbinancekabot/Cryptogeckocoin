@@ -314,18 +314,28 @@ def run_bot():
                         time.sleep(1.2)
 
                     elif signal == "HOLD" and score >= 50:
-                        message = f"""ℹ️ HOLD Signal – {coin} ({interval})
-💰 Price: {price}
-📌 Trade Type: {trade_type}
-📊 Confidence: {score}/100
-[{ "█" * (score // 10) + "░" * (10 - score // 10) }]
-🧠 Reasons:
-{chr(10).join(reasons)}
+    sl = round(price - (1.5 * atr), 4)
+    target = round(price + (2.5 * atr), 4)
+    confidence_bar = "█" * (score // 10) + "░" * (10 - score // 10)
+    reason_text = "\n".join(reasons)
 
-📎 Note: HOLD signal is just informational. Wait for stronger confirmation.
+    message = f"""ℹ️ HOLD Signal – {coin} ({interval})
+💰 Price: {price}
+🎯 Target: {target}
+🛡️ Stop Loss: {sl}
+📌 Trade Type: {trade_type}
+
+📊 Confidence: {score}/100  
+[{confidence_bar}]
+📈 Hit Chance: {hit_chance}%
+
+🧠 Reasons:
+{reason_text}
+
+📎 *Note: This is a HOLD signal (Not yet confirmed). Wait for stronger confirmation before taking a trade.*
 """
-                        send_telegram_message(message)
-                        time.sleep(1.2)
+    send_telegram_message(message)
+    time.sleep(1.2)
 
                     else:
                         print(f"❌ Skipped {coin} @ {interval} – Signal: {signal}, Score: {score}") 
