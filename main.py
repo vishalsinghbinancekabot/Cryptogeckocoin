@@ -298,7 +298,7 @@ def run_bot():
                         reasons
                     )
 
-                    if score >= 30:
+                    if score >= 50:
                         send_telegram_message(message)
                         time.sleep(1.2)
                     else:
