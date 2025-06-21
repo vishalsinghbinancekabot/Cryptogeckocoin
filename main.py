@@ -305,15 +305,16 @@ def run_bot():
                         print(f"❌ Flat Market (ADX {latest['adx']}), skipping...")
                         continue
 
-                   if signal in ["BUY", "SELL"] and score >= 50:
-    message = format_signal_message(
-        coin, interval, signal, score, trade_type, price, reasons, hit_chance, atr
-    )
-    send_telegram_message(message)
-    time.sleep(1.2)
+                    # 👇 Correctly indented if-elif-else block
+                    if signal in ["BUY", "SELL"] and score >= 50:
+                        message = format_signal_message(
+                            coin, interval, signal, score, trade_type, price, reasons, hit_chance, atr
+                        )
+                        send_telegram_message(message)
+                        time.sleep(1.2)
 
-elif signal == "HOLD" and score >= 50:
-    message = f"""ℹ️ HOLD Signal – {coin} ({interval})
+                    elif signal == "HOLD" and score >= 50:
+                        message = f"""ℹ️ HOLD Signal – {coin} ({interval})
 💰 Price: {price}
 📌 Trade Type: {trade_type}
 📊 Confidence: {score}/100
@@ -323,11 +324,12 @@ elif signal == "HOLD" and score >= 50:
 
 📎 Note: HOLD signal is just informational. Wait for stronger confirmation.
 """
-    send_telegram_message(message)
-    time.sleep(1.2)
+                        send_telegram_message(message)
+                        time.sleep(1.2)
 
-else:
-    print(f"❌ Skipped {coin} @ {interval} – Signal: {signal}, Score: {score}") 
+                    else:
+                        print(f"❌ Skipped {coin} @ {interval} – Signal: {signal}, Score: {score}") 
+
                 except Exception as e:
                     print(f"⚠️ Error processing {coin} @ {interval}: {e}")
                     
