@@ -47,10 +47,21 @@ COINS = [
 
     # 🛠️ Emerging / Misc
     "ACHUSDT", "BICOUSDT", "BRZUSDT", "CELOUSDT", "CLVUSDT", "FIROUSDT", "FORTHUSDT", "HNTUSDT", "HODLUSDT",
-    "LPTUSDT", "MASKUSDT", "MERUSDT", "MLKUSDT", "NKNUSDT", "PLAUSDT", "PNUTUSDT", "POLUSDT", "PUNDIXUSDT", "PSGUSDT",
-    "SLPUSDT", "SRMUSDT", "STMXUSDT", "TRIBEUSDT", "TRUUSDT", "WNXMUSDT", "ZILUSDT"
+    "LPTUSDT", "MASKUSDT", "MERUSDT", "MLKUSDT", "NKNUSDT", "PLAUSDT", "PNUTUSDT", "PUNDIXUSDT", "PSGUSDT",
+    "SRMUSDT", "STMXUSDT", "TRIBEUSDT", "TRUUSDT", "WNXMUSDT", "ZILUSDT"
 ]
 COINS = list(set(COINS))  # Duplicate hata dega
+
+def get_valid_symbols():
+    try:
+        exchange_info = requests.get("https://api.binance.com/api/v3/exchangeInfo").json()
+        return set([s['symbol'] for s in exchange_info['symbols']])
+    except Exception as e:
+        print("Error fetching Binance symbols:", e)
+        return set()
+
+valid_symbols = get_valid_symbols()
+COINS = [coin for coin in COINS if coin in valid_symbols]
 
 INTERVALS = ["5m", "15m", "1h", "1d"]
 CANDLE_LIMIT = 100
